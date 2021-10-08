@@ -1,0 +1,10 @@
+# Haskell
+*.hi
+*.o
+
+# Cabal
+*.cabal
+
+# Haskell Tool Stack
+.stack-work/
+dist/
