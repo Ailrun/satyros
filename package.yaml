@@ -34,6 +34,7 @@ library:
     - extra
     - mtl
     - random
+    - vector
   ## Library fields
   # exposed:
   # exposed-modules:

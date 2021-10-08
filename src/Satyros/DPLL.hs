@@ -13,8 +13,8 @@ import qualified Data.IntSet            as IntSet
 import           Data.List.Extra        (notNull, partition, (\\))
 import           Data.STRef             (STRef, modifySTRef', newSTRef,
                                          readSTRef, writeSTRef)
-import           Data.Sequence          (Seq)
-import qualified Data.Sequence          as Seq
+import           Data.Vector            (Vector)
+import qualified Data.Vector            as Vector
 import qualified Satyros.CNF            as CNF
 import           Satyros.Util           (intToWord, wordToInt)
 import           System.Random          (getStdRandom)
@@ -34,7 +34,7 @@ data DPLLAssignment
 data DPLLState s
   = DPLLState
     { unsetVariablesRef :: STRef s IntSet
-    , clauses           :: Seq CNF.Clause
+    , clauses           :: Vector CNF.Clause
     , assignmentsRef    :: STRef s (IntMap DPLLAssignment)
     , variableLevelsRef :: STRef s [STRef s (Int, IntSet)]
     , stGenRef          :: STRef s (STGenM StdGen s)
@@ -104,7 +104,7 @@ initialize stGen f = do
 
     (emptyCs, nonemptyCs) = partition CNF.emptyClause cs
     (unitCs, nonunitCs) = partition CNF.unitClause nonemptyCs
-    clauses = Seq.fromList nonunitCs
+    clauses = Vector.fromList nonunitCs
 
     cnfLits = [l | CNF.Clause ls <- unitCs, l <- ls]
     initialAssignmentPairs =
