@@ -42,14 +42,14 @@ data DPLLState s
 
 type DPLLMonad s = ReaderT (DPLLState s) (ExceptT DPLLFailure (ST s))
 
-dpll :: (Int, Int, CNF.Formula) -> IO (Either DPLLFailure [Bool])
+dpll :: CNF.Formula -> IO (Either DPLLFailure [CNF.Positivity])
 dpll = getStdRandom . dpll'
 
-dpll' :: (Int, Int, CNF.Formula) -> StdGen -> (Either DPLLFailure [Bool], StdGen)
+dpll' :: CNF.Formula -> StdGen -> (Either DPLLFailure [CNF.Positivity], StdGen)
 dpll' input gen =
   runSTGen gen $ \stGen -> runExceptT $ initialize stGen input >>= runReaderT startMainLoop
   where
-    startMainLoop :: DPLLMonad s [Bool]
+    startMainLoop :: DPLLMonad s [CNF.Positivity]
     startMainLoop =
       ifM (bcp True)
       ( ifM decide
@@ -60,7 +60,7 @@ dpll' input gen =
 
     -- |
     -- Main loop for DPLL search.
-    mainLoop :: DPLLMonad s [Bool]
+    mainLoop :: DPLLMonad s [CNF.Positivity]
     mainLoop =
       ifM (bcp False)
       ( ifM decide
@@ -69,7 +69,7 @@ dpll' input gen =
       )
       backtrack
 
-    getFinalAssignment :: DPLLMonad s [Bool]
+    getFinalAssignment :: DPLLMonad s [CNF.Positivity]
     getFinalAssignment = do
       fmap value
         . IntMap.elems
@@ -77,7 +77,7 @@ dpll' input gen =
 
     -- |
     -- (Chronological) backtracking
-    backtrack :: DPLLMonad s [Bool]
+    backtrack :: DPLLMonad s [CNF.Positivity]
     backtrack =
       ifM dropCoveredLevels
         mainLoop
@@ -85,24 +85,21 @@ dpll' input gen =
 
 -- |
 -- Initialize DPLL database and resolve trivial error cases / unit clauses.
-initialize :: STGenM StdGen s -> (Int, Int, CNF.Formula) -> ExceptT DPLLFailure (ST s) (DPLLState s)
-initialize stGen (nv, nc, f) = do
-  when (length cs /= nc) $
-    throwError $ DPLLException "The number of clauses mismatches. Check your DIMACS file."
+initialize :: STGenM StdGen s -> CNF.Formula -> ExceptT DPLLFailure (ST s) (DPLLState s)
+initialize stGen f = do
   when (notNull emptyCs) $
     throwError $ DPLLUnsatisfiable "Empty clauses are detected. Is this really intended?"
-  when (CNF.maxVariableInFormula f > CNF.Variable (fromIntegral nv)) $
-    throwError $ DPLLException "The number of variables mistmatches. Check your DIMACS file."
   forM_ initialAssignmentPairs $ \(v, value -> b) ->
-    when (fmap value (IntMap.lookup v initialAssignment) == Just (not b)) $
+    when (fmap value (IntMap.lookup v initialAssignment) == Just (CNF.negatePositivity b)) $
       throwError $ DPLLUnsatisfiable "The initial constraint derives a conflict"
 
-  unsetVariablesRef <- lift . newSTRef $ IntSet.fromList $ [1..nv] \\ initialSetVariables
+  unsetVariablesRef <- lift . newSTRef $ IntSet.fromList $ [1..mv] \\ initialSetVariables
   assignmentsRef <- lift $ newSTRef initialAssignment
   variableLevelsRef <- lift $ newSTRef []
   stGenRef <- lift $ newSTRef stGen
   pure DPLLState{..}
   where
+    (CNF.Variable (wordToInt -> mv)) = CNF.maxVariableInFormula f
     cs = CNF.unFormula f
 
     (emptyCs, nonemptyCs) = partition CNF.emptyClause cs
@@ -179,11 +176,13 @@ dropCoveredLevels = do
       (dv, vl) <- lift . lift $ readSTRef vlRef
       modifySTRefDPLLState' assignmentsRef (`IntMap.withoutKeys` IntSet.delete dv vl)
       modifySTRefDPLLState' assignmentsRef
-        (IntMap.adjust (\DPLLAssignment{..} -> DPLLAssignment{value = not value, covered = True}) dv)
+        (IntMap.adjust negateAssignment dv)
       modifySTRefDPLLState' unsetVariablesRef (<> IntSet.delete dv vl)
       lift . lift $ writeSTRef vlRef (dv, IntSet.singleton dv)
       pure True
   where
+    negateAssignment DPLLAssignment{..} = DPLLAssignment{value = CNF.negatePositivity value, covered = True}
+
     go :: [STRef s (Int, IntSet)] -> DPLLMonad s (Maybe (STRef s (Int, IntSet)))
     go [] = pure Nothing
     go (vlRef:vlRefs) = do
@@ -205,7 +204,7 @@ insertNewLevel v = do
   newLevel <- lift . lift $ newSTRef (v, IntSet.empty)
   modifySTRefDPLLState' variableLevelsRef (newLevel :)
 
-insertNewAssignment :: CNF.Positivity -> CNF.Variable -> Bool -> DPLLMonad s ()
+insertNewAssignment :: Bool -> CNF.Variable -> CNF.Positivity -> DPLLMonad s ()
 insertNewAssignment isStart (CNF.Variable v) b = do
   unless isStart $ do
     (head -> vlRef) <- readSTRefDPLLState variableLevelsRef

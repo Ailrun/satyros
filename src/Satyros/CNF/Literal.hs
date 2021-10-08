@@ -1,16 +1,15 @@
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE ViewPatterns    #-}
 module Satyros.CNF.Literal
-  ( Positivity
-  , Literal(Literal)
+  ( Literal(Literal)
   , literalToVariable
   , literalToPositivity
   ) where
 
-import           Satyros.CNF.Variable (Variable (Variable))
-import           Satyros.Util         (intToWord, wordToInt)
-
-type Positivity = Bool
+import           Satyros.CNF.Positivity (Positivity (Negative, Positive),
+                                         boolToPositivity)
+import           Satyros.CNF.Variable   (Variable (Variable))
+import           Satyros.Util           (intToWord, wordToInt)
 
 newtype Literal = LiteralInternal Int
   deriving stock (Eq)
@@ -18,8 +17,8 @@ newtype Literal = LiteralInternal Int
 
 pattern Literal :: Positivity -> Variable -> Literal
 pattern Literal a b <- (matchLiteral -> (a, b)) where
-  Literal True  (Variable b) = LiteralInternal (wordToInt b)
-  Literal False (Variable b) = LiteralInternal (- wordToInt b)
+  Literal Positive (Variable b) = LiteralInternal (wordToInt b)
+  Literal Negative (Variable b) = LiteralInternal (- wordToInt b)
 {-# COMPLETE Literal #-}
 
 matchLiteral :: Literal -> (Positivity, Variable)
@@ -31,5 +30,5 @@ literalToVariable (LiteralInternal n) = Variable (intToWord (abs n))
 {-# INLINE literalToVariable #-}
 
 literalToPositivity :: Literal -> Positivity
-literalToPositivity (LiteralInternal n) = n > 0
+literalToPositivity (LiteralInternal n) = boolToPositivity (n > 0)
 {-# INLINE literalToPositivity #-}
