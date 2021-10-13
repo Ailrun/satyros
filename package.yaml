@@ -33,6 +33,7 @@ library:
     - containers
     - extra
     - free
+    - lens
     - mtl
     - random
     - vector
