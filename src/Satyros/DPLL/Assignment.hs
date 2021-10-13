@@ -6,13 +6,13 @@ import qualified Satyros.CNF  as CNF
 import           Satyros.Util (wordToInt)
 
 type Covered = Bool
-newtype Assignment = Assignment (IntMap (Bool, Covered, Maybe (CNF.Variable, Int)))
+newtype Assignment = Assignment (IntMap (Bool, Covered, Maybe CNF.Clause))
   deriving newtype (Show)
 
-value :: (Bool, Covered, Maybe (CNF.Variable, Int)) -> Bool
+value :: (Bool, Covered, Maybe CNF.Clause) -> Bool
 value (v, _, _) = v
 
-assignValue :: CNF.Literal -> Maybe (CNF.Variable, Int) -> Assignment -> Assignment
+assignValue :: CNF.Literal -> Maybe CNF.Clause -> Assignment -> Assignment
 assignValue (CNF.Literal CNF.Positive (CNF.Variable v)) p (Assignment m) = Assignment $ IntMap.insert (wordToInt v) (True, False, p) m
 assignValue (CNF.Literal CNF.Negative (CNF.Variable v)) p (Assignment m) = Assignment $ IntMap.insert (wordToInt v) (False, False, p) m
 

@@ -4,16 +4,15 @@ import           Control.Monad.State.Strict (MonadState, State, gets)
 import           Control.Monad.Trans.Free   (FreeT, MonadFree (wrap))
 import qualified Satyros.CNF                as CNF
 import           Satyros.DPLL.Assignment    (getAssignedValue)
-import           Satyros.DPLL.State         (GeneralState (assignment, clauses))
-import Debug.Trace (trace)
+import           Satyros.DPLL.Storage       (Storage (assignment, clauses))
 
 data BCPF r
   = BCPUnitClause CNF.Clause CNF.Literal r
   | BCPConflict CNF.Clause
   deriving stock (Show, Functor)
 
-newtype BCP a = BCP{ runBCP :: FreeT BCPF (State GeneralState) a }
-  deriving newtype (Functor, Applicative, Monad, MonadFree BCPF, MonadState GeneralState)
+newtype BCP a = BCP{ runBCP :: FreeT BCPF (State Storage) a }
+  deriving newtype (Functor, Applicative, Monad, MonadFree BCPF, MonadState Storage)
 
 instance Show (BCP a) where
   showsPrec p _ = showParen (p > 10) $ showString "BCP <leftover>"
@@ -32,7 +31,6 @@ bcpOfClause c@(CNF.Clause ls') = do
   where
     go _    [] = Nothing
     go asgn (l:ls)
-      | trace (show (l:ls) <> " " <> show v) False = undefined
       | Just True <- v = Just Nothing
       | Just False <- v = leftover
       | Nothing <- leftover = Just (Just l)
