@@ -1,20 +1,39 @@
 module Satyros.DPLL.Assignment where
 
-import           Data.IntMap  (IntMap)
-import qualified Data.IntMap  as IntMap
+import           Control.Lens (At (at), Getter, Index, IxValue, Ixed,
+                               Wrapped (Unwrapped, _Wrapped'), _1, _3, _Just,
+                               iso, pre, to)
+import           Data.Map     (Map)
+import qualified Data.Map     as Map
 import qualified Satyros.CNF  as CNF
-import           Satyros.Util (wordToInt)
 
 type Covered = Bool
-newtype Assignment = Assignment (IntMap (Bool, Covered, Maybe CNF.Clause))
+newtype Assignment = Assignment { getAssignment :: Map CNF.Variable (Bool, Covered, Maybe CNF.Clause) }
   deriving newtype (Show)
 
-value :: (Bool, Covered, Maybe CNF.Clause) -> Bool
-value (v, _, _) = v
+instance Wrapped Assignment where
+  type Unwrapped Assignment = Map CNF.Variable (Bool, Covered, Maybe CNF.Clause)
+  _Wrapped' = iso getAssignment Assignment
+
+type instance Index Assignment = CNF.Variable
+type instance IxValue Assignment = (Bool, Covered, Maybe CNF.Clause)
+
+instance Ixed Assignment
+instance At Assignment where
+  at i = _Wrapped' . at i
 
 assignValue :: CNF.Literal -> Maybe CNF.Clause -> Assignment -> Assignment
-assignValue (CNF.Literal CNF.Positive (CNF.Variable v)) p (Assignment m) = Assignment $ IntMap.insert (wordToInt v) (True, False, p) m
-assignValue (CNF.Literal CNF.Negative (CNF.Variable v)) p (Assignment m) = Assignment $ IntMap.insert (wordToInt v) (False, False, p) m
+assignValue (CNF.Literal CNF.Positive x) p (Assignment m) = Assignment $ Map.insert x (True, False, p) m
+assignValue (CNF.Literal CNF.Negative x) p (Assignment m) = Assignment $ Map.insert x (False, False, p) m
 
-getAssignedValue :: Assignment -> CNF.Literal -> Maybe Bool
-getAssignedValue (Assignment asgn) (CNF.Literal p (CNF.Variable v)) = (p ==) . CNF.boolToPositivity . value <$> IntMap.lookup (wordToInt v) asgn
+valueOfLiteral :: CNF.Literal -> Getter Assignment (Maybe Bool)
+valueOfLiteral (CNF.Literal v x) = at x . pre (_Just . _1 . to ((== v) . CNF.boolToPositivity))
+
+parentsOfLiteral :: CNF.Literal -> Getter Assignment (Maybe (Maybe CNF.Clause))
+parentsOfLiteral (CNF.Literal _ x) = at x . pre (_Just . _3)
+
+-- getCovered :: Assignment -> CNF.Literal -> Maybe Covered
+-- getCovered (Assignment asgn) (CNF.Literal _ x) = covered <$> Map.lookup x asgn
+
+-- getParents :: Assignment -> CNF.Literal -> Maybe (Maybe CNF.Clause)
+-- getParents (Assignment asgn) (CNF.Literal _ x) = parents <$> Map.lookup x asgn

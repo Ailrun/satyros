@@ -4,20 +4,19 @@ module Satyros.DPLL.Storage where
 
 import           Control.Lens            (makeFieldsNoPrefix, set, to, (&),
                                           (.~), (^.))
-import           Data.IntSet             (IntSet)
+import           Data.Set                (Set)
 import           Data.Vector             (Vector)
 import qualified Satyros.CNF             as CNF
 import           Satyros.DPLL.Assignment (Assignment)
-import           System.Random           (RandomGen (genShortByteString, genWord16, genWord32, genWord32R, genWord64, genWord64R, genWord8, split),
-                                          StdGen)
+import           System.Random           (RandomGen (..), StdGen)
 
 data Storage
   = Storage
-    { _unsetVariables :: IntSet
-    , _clauses        :: Vector CNF.Clause
-    , _assignment     :: Assignment
-    , _variableLevels :: [(Int, IntSet)]
-    , _stdGen         :: StdGen
+    { _unassignedVariables :: Set CNF.Variable
+    , _clauses             :: Vector CNF.Clause
+    , _assignment          :: Assignment
+    , _variableLevels      :: [(CNF.Variable, Set CNF.Variable)]
+    , _stdGen              :: StdGen
     }
   deriving stock (Show)
 

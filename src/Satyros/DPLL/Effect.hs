@@ -16,8 +16,8 @@ newtype DPLL a = DPLL{ runDPLL :: FreeT DPLLF (State Storage) a }
   deriving newtype (Functor, Applicative, Monad, MonadFree DPLLF, MonadState Storage)
 
 instance Show1 DPLL where
-  liftShowsPrec sp slp p =
-    liftShowsPrec sp slp p
+  liftShowsPrec sp slp d =
+    showsUnaryWith (liftShowsPrec sp slp) "DPLL" d
     . hoistFreeT (const $ Const "<stateful computation>")
     . runDPLL
 
@@ -25,19 +25,21 @@ instance (Show a) => Show (DPLL a) where
   showsPrec = showsPrec1
 
 stepDPLL :: DPLL a -> Storage -> (FreeF DPLLF a (DPLL a), Storage)
-stepDPLL b s = first (fmap DPLL) $ runState (runFreeT (runDPLL b)) s
+stepDPLL d s = first (fmap DPLL) $ runState (runFreeT (runDPLL d)) s
 {-# INLINE stepDPLL #-}
 
 data DPLLF r
   = BCPUnitClause CNF.Clause CNF.Literal r
   | BCPConflict CNF.Clause r
+  | BCPConflictDrivenClause CNF.Clause r
   | DecisionResult CNF.Literal r
   | DecisionComplete r
   deriving stock (Show, Functor)
 
 instance Show1 DPLLF where
   liftShowsPrec sp _ d (BCPUnitClause c l r) = showsTernaryWith showsPrec showsPrec sp "BCPUnitClause" d c l r
-  liftShowsPrec sp _ d (BCPConflict c r) = showsBinaryWith showsPrec sp "BCPUnitClause" d c r
+  liftShowsPrec sp _ d (BCPConflict c r) = showsBinaryWith showsPrec sp "BCPConflict" d c r
+  liftShowsPrec sp _ d (BCPConflictDrivenClause c r) = showsBinaryWith showsPrec sp "BCPConflictDrivenClause" d c r
   liftShowsPrec sp _ d (DecisionResult l r) = showsBinaryWith showsPrec sp "DecisionResult" d l r
   liftShowsPrec sp _ d (DecisionComplete r) = showsUnaryWith sp "DecisionComplete" d r
 
@@ -48,6 +50,10 @@ bcpUnitClause c l = wrap . BCPUnitClause c l $ pure ()
 bcpConflict :: CNF.Clause -> DPLL ()
 bcpConflict c = wrap . BCPConflict c $ pure ()
 {-# INLINE bcpConflict #-}
+
+bcpConflictDrivenClause :: CNF.Clause -> DPLL ()
+bcpConflictDrivenClause c = wrap . BCPConflictDrivenClause c $ pure ()
+{-# INLINE bcpConflictDrivenClause #-}
 
 decisionResult :: CNF.Literal -> DPLL ()
 decisionResult l = wrap . DecisionResult l $ pure ()

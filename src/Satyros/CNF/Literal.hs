@@ -2,6 +2,7 @@
 {-# LANGUAGE ViewPatterns    #-}
 module Satyros.CNF.Literal
   ( Literal(Literal)
+  , negateLiteral
   , literalToVariable
   , literalToPositivity
   ) where
@@ -12,7 +13,7 @@ import           Satyros.CNF.Variable   (Variable (Variable))
 import           Satyros.Util           (intToWord, wordToInt)
 
 newtype Literal = LiteralInternal Int
-  deriving stock (Eq)
+  deriving stock (Eq, Ord)
   deriving newtype (Show)
 
 pattern Literal :: Positivity -> Variable -> Literal
@@ -24,6 +25,10 @@ pattern Literal a b <- (matchLiteral -> (a, b)) where
 matchLiteral :: Literal -> (Positivity, Variable)
 matchLiteral l = (literalToPositivity l, literalToVariable l)
 {-# INLINE matchLiteral #-}
+
+negateLiteral :: Literal -> Literal
+negateLiteral (LiteralInternal n) = LiteralInternal (- n)
+{-# INLINE negateLiteral #-}
 
 literalToVariable :: Literal -> Variable
 literalToVariable (LiteralInternal n) = Variable (intToWord (abs n))
