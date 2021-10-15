@@ -1,4 +1,5 @@
 {-# LANGUAGE ViewPatterns #-}
+{-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
 module Satyros.DPLL where
 
 import           Control.Monad.Except   (ExceptT, runExceptT, throwError)
@@ -100,7 +101,7 @@ initialize stGen f = do
   pure DPLLState{..}
   where
     (CNF.Variable (wordToInt -> mv)) = CNF.maxVariableInFormula f
-    cs = CNF.unFormula f
+    cs = f ^. CNF.clausesOfFormula
 
     (emptyCs, nonemptyCs) = partition CNF.emptyClause cs
     (unitCs, nonunitCs) = partition CNF.unitClause nonemptyCs

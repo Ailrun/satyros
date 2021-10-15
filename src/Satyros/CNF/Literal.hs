@@ -7,8 +7,9 @@ module Satyros.CNF.Literal
   , literalToPositivity
   ) where
 
+import           Control.Lens           ((#))
 import           Satyros.CNF.Positivity (Positivity (Negative, Positive),
-                                         boolToPositivity)
+                                         isPositive)
 import           Satyros.CNF.Variable   (Variable (Variable))
 import           Satyros.Util           (intToWord, wordToInt)
 
@@ -35,5 +36,5 @@ literalToVariable (LiteralInternal n) = Variable (intToWord (abs n))
 {-# INLINE literalToVariable #-}
 
 literalToPositivity :: Literal -> Positivity
-literalToPositivity (LiteralInternal n) = boolToPositivity (n > 0)
+literalToPositivity (LiteralInternal n) = isPositive # (n > 0)
 {-# INLINE literalToPositivity #-}

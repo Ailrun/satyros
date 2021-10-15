@@ -1,8 +1,10 @@
 module Satyros.DPLL.StorageUtil where
 
-import           Control.Lens            (_2, _Just, filtered, folded, ix, to,
-                                          use, uses, (%=), (^.), (^..))
-import           Data.Maybe              (isNothing)
+import           Control.Lens            (_2, _Just, _Nothing, _Right, each,
+                                          failing, filtered, ix, like, re, use,
+                                          uses, (%=), (^.), (^..))
+import           Data.Either             (partitionEithers)
+import           Data.List               (partition)
 import qualified Data.Set                as Set
 import qualified Satyros.CNF             as CNF
 import           Satyros.DPLL.Assignment (assignValue, parentsOfLiteral)
@@ -26,17 +28,17 @@ deriveConflictClauseRelSAT :: CNF.Clause -> DPLL CNF.Clause
 deriveConflictClauseRelSAT c = do
   asgn <- use assignment
   (_, vl) <- uses variableLevels head
-  pure . CNF.Clause . Set.toList . go asgn vl $ CNF.unClause c
+  pure . CNF.Clause . Set.toList . go asgn vl $ c ^. CNF.literalsOfClause
   where
     go asgn vl ls
       | null psAtCurrent = Set.fromList lsWithoutP <> Set.fromList psAtLower
       | otherwise = Set.fromList lsWithoutP <> Set.fromList psAtLower <> go asgn vl psAtCurrent
       where
-        psAtCurrent = filter ((`Set.member` vl) . CNF.literalToVariable) ps
-        psAtLower = filter ((`Set.notMember` vl) . CNF.literalToVariable) ps
+        (psAtCurrent, psAtLower) = partition ((`Set.member` vl) . CNF.literalToVariable) ps
 
-        ps = map CNF.negateLiteral ls >>= \l ->
-          asgn ^.. parentsOfLiteral l . _Just . _Just . to CNF.unClause . folded . filtered (/= l)
+        (lsWithoutP, ps) = partitionEithers . flip concatMap ls $ \l ->
+          asgn
+          ^.. parentsOfLiteral l
+          . failing (_Just . literalsInParentsOf l . re _Right) (_Nothing . like (Left l))
 
-        lsWithoutP = filter (maybe False isNothing . (asgn ^.) . parentsOfLiteral) ls
-        -- vs = partition (isNothing . snd) . zip ls $ getParents asgn <$> ls
+        literalsInParentsOf l = CNF.literalsOfClause . each . filtered (/= CNF.negateLiteral l)
