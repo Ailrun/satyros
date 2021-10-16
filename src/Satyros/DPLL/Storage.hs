@@ -15,7 +15,7 @@ data Storage
     { _unassignedVariables :: Set CNF.Variable
     , _clauses             :: Vector CNF.Clause
     , _assignment          :: Assignment
-    , _variableLevels      :: [(CNF.Variable, Set CNF.Variable)]
+    , _variableLevels      :: [(Maybe CNF.Variable, Set CNF.Variable)]
     , _stdGen              :: StdGen
     }
   deriving stock (Show)

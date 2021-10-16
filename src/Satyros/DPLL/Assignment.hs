@@ -1,39 +1,36 @@
 module Satyros.DPLL.Assignment where
 
-import           Control.Lens (At (at), Index, IxValue, Ixed,
-                               Wrapped (Unwrapped, _Wrapped'), _1, _3, _Just,
-                               filtered, from, iso, view, Traversal')
+import           Control.Lens (At (at), Index, IxValue, Ixed, Traversal',
+                               Wrapped (Unwrapped, _Wrapped'), _1, _2, _Just,
+                               filtered, iso, (?~), (^.))
 import           Data.Map     (Map)
 import qualified Data.Map     as Map
+import           Data.Set     (Set)
 import qualified Satyros.CNF  as CNF
 
-type Covered = Bool
-newtype Assignment = Assignment { getAssignment :: Map CNF.Variable (Bool, Covered, Maybe CNF.Clause) }
+newtype Assignment = Assignment { getAssignment :: Map CNF.Variable (Bool, Maybe CNF.Clause) }
   deriving newtype (Show)
 
 instance Wrapped Assignment where
-  type Unwrapped Assignment = Map CNF.Variable (Bool, Covered, Maybe CNF.Clause)
+  type Unwrapped Assignment = Map CNF.Variable (Bool, Maybe CNF.Clause)
   _Wrapped' = iso getAssignment Assignment
 
 type instance Index Assignment = CNF.Variable
-type instance IxValue Assignment = (Bool, Covered, Maybe CNF.Clause)
+type instance IxValue Assignment = (Bool, Maybe CNF.Clause)
 
 instance Ixed Assignment
 instance At Assignment where
   at i = _Wrapped' . at i
 
-assignValue :: CNF.Literal -> Maybe CNF.Clause -> Assignment -> Assignment
-assignValue (CNF.Literal CNF.Positive x) p (Assignment m) = Assignment $ Map.insert x (True, False, p) m
-assignValue (CNF.Literal CNF.Negative x) p (Assignment m) = Assignment $ Map.insert x (False, False, p) m
+assignVariable :: CNF.Literal -> Maybe CNF.Clause -> Assignment -> Assignment
+assignVariable (CNF.Literal CNF.Positive x) p = at x ?~ (True, p)
+assignVariable (CNF.Literal CNF.Negative x) p = at x ?~ (False, p)
+
+eraseVariables :: Set CNF.Variable -> Assignment -> Assignment
+eraseVariables xs = Assignment . flip Map.withoutKeys xs . getAssignment
 
 valueOfLiteral :: CNF.Literal -> Traversal' Assignment Bool
-valueOfLiteral (CNF.Literal v x) = at x . _Just . _1 . filtered ((== v) . view (from CNF.isPositive))
+valueOfLiteral (CNF.Literal v x) = at x . _Just . _1 . filtered (== v ^. CNF.isPositive)
 
 parentsOfLiteral :: CNF.Literal -> Traversal' Assignment (Maybe CNF.Clause)
-parentsOfLiteral (CNF.Literal _ x) = at x . _Just . _3
-
--- getCovered :: Assignment -> CNF.Literal -> Maybe Covered
--- getCovered (Assignment asgn) (CNF.Literal _ x) = covered <$> Map.lookup x asgn
-
--- getParents :: Assignment -> CNF.Literal -> Maybe (Maybe CNF.Clause)
--- getParents (Assignment asgn) (CNF.Literal _ x) = parents <$> Map.lookup x asgn
+parentsOfLiteral (CNF.Literal _ x) = at x . _Just . _2

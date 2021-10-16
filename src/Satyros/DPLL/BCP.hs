@@ -5,7 +5,7 @@ module Satyros.DPLL.BCP
   ) where
 
 import           Control.Lens             (use, (^?))
-import           Control.Monad.Except     (MonadError (throwError), runExceptT)
+import           Control.Monad.Except     (runExceptT, throwError)
 import           Control.Monad.Extra      (eitherM, forM_)
 import qualified Satyros.CNF              as CNF
 import           Satyros.DPLL.Assignment  (valueOfLiteral)

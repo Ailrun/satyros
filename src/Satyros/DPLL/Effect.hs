@@ -34,6 +34,8 @@ data DPLLF r
   | BCPConflictDrivenClause CNF.Clause r
   | DecisionResult CNF.Literal r
   | DecisionComplete r
+  | BacktraceExhaustion r
+  | BacktraceComplete CNF.Clause CNF.Literal r
   deriving stock (Show, Functor)
 
 instance Show1 DPLLF where
@@ -42,6 +44,8 @@ instance Show1 DPLLF where
   liftShowsPrec sp _ d (BCPConflictDrivenClause c r) = showsBinaryWith showsPrec sp "BCPConflictDrivenClause" d c r
   liftShowsPrec sp _ d (DecisionResult l r) = showsBinaryWith showsPrec sp "DecisionResult" d l r
   liftShowsPrec sp _ d (DecisionComplete r) = showsUnaryWith sp "DecisionComplete" d r
+  liftShowsPrec sp _ d (BacktraceExhaustion r) = showsUnaryWith sp "BacktraceExhaustion" d r
+  liftShowsPrec sp _ d (BacktraceComplete c l r) = showsTernaryWith showsPrec showsPrec sp "BacktraceComplete" d c l r
 
 bcpUnitClause :: CNF.Clause -> CNF.Literal -> DPLL ()
 bcpUnitClause c l = wrap . BCPUnitClause c l $ pure ()
@@ -62,3 +66,11 @@ decisionResult l = wrap . DecisionResult l $ pure ()
 decisionComplete :: DPLL ()
 decisionComplete = wrap . DecisionComplete $ pure ()
 {-# INLINE decisionComplete #-}
+
+backtraceExhaustion :: DPLL ()
+backtraceExhaustion = wrap . BacktraceExhaustion $ pure ()
+{-# INLINE backtraceExhaustion #-}
+
+backtraceComplete :: CNF.Clause -> CNF.Literal -> DPLL ()
+backtraceComplete c l = wrap . BacktraceComplete c l $ pure ()
+{-# INLINE backtraceComplete #-}
