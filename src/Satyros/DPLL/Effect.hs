@@ -32,20 +32,20 @@ data DPLLF r
   = BCPUnitClause CNF.Clause CNF.Literal r
   | BCPConflict CNF.Clause r
   | BCPConflictDrivenClause CNF.Clause r
-  | DecisionResult CNF.Literal r
-  | DecisionComplete r
-  | BacktraceExhaustion r
-  | BacktraceComplete CNF.Clause CNF.Literal r
+  | DecisionResult CNF.Literal
+  | DecisionComplete
+  | BacktraceExhaustion
+  | BacktraceComplete CNF.Clause CNF.Literal
   deriving stock (Show, Functor)
 
 instance Show1 DPLLF where
   liftShowsPrec sp _ d (BCPUnitClause c l r) = showsTernaryWith showsPrec showsPrec sp "BCPUnitClause" d c l r
   liftShowsPrec sp _ d (BCPConflict c r) = showsBinaryWith showsPrec sp "BCPConflict" d c r
   liftShowsPrec sp _ d (BCPConflictDrivenClause c r) = showsBinaryWith showsPrec sp "BCPConflictDrivenClause" d c r
-  liftShowsPrec sp _ d (DecisionResult l r) = showsBinaryWith showsPrec sp "DecisionResult" d l r
-  liftShowsPrec sp _ d (DecisionComplete r) = showsUnaryWith sp "DecisionComplete" d r
-  liftShowsPrec sp _ d (BacktraceExhaustion r) = showsUnaryWith sp "BacktraceExhaustion" d r
-  liftShowsPrec sp _ d (BacktraceComplete c l r) = showsTernaryWith showsPrec showsPrec sp "BacktraceComplete" d c l r
+  liftShowsPrec _  _ d (DecisionResult l) = showsUnaryWith showsPrec "DecisionResult" d l
+  liftShowsPrec _  _ _ DecisionComplete = showString "DecisionComplete"
+  liftShowsPrec _  _ _ BacktraceExhaustion = showString "BacktraceExhaustion"
+  liftShowsPrec _  _ d (BacktraceComplete c l) = showsBinaryWith showsPrec showsPrec "BacktraceComplete" d c l
 
 bcpUnitClause :: CNF.Clause -> CNF.Literal -> DPLL ()
 bcpUnitClause c l = wrap . BCPUnitClause c l $ pure ()
@@ -60,17 +60,17 @@ bcpConflictDrivenClause c = wrap . BCPConflictDrivenClause c $ pure ()
 {-# INLINE bcpConflictDrivenClause #-}
 
 decisionResult :: CNF.Literal -> DPLL ()
-decisionResult l = wrap . DecisionResult l $ pure ()
+decisionResult = wrap . DecisionResult
 {-# INLINE decisionResult #-}
 
 decisionComplete :: DPLL ()
-decisionComplete = wrap . DecisionComplete $ pure ()
+decisionComplete = wrap DecisionComplete
 {-# INLINE decisionComplete #-}
 
 backtraceExhaustion :: DPLL ()
-backtraceExhaustion = wrap . BacktraceExhaustion $ pure ()
+backtraceExhaustion = wrap BacktraceExhaustion
 {-# INLINE backtraceExhaustion #-}
 
 backtraceComplete :: CNF.Clause -> CNF.Literal -> DPLL ()
-backtraceComplete c l = wrap . BacktraceComplete c l $ pure ()
+backtraceComplete c = wrap . BacktraceComplete c
 {-# INLINE backtraceComplete #-}

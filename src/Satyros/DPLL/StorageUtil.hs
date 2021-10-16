@@ -4,7 +4,7 @@ module Satyros.DPLL.StorageUtil where
 import           Control.Lens            (_2, _Just, _Nothing, _Right, each,
                                           failing, filtered, ix, like, re,
                                           takingWhile, to, use, uses, (%=), (&),
-                                          (.=), (<|), (^.), (^..))
+                                          (.=), (<|), (^.), (^..), (|>))
 import           Data.Either             (partitionEithers)
 import           Data.List               (partition)
 import           Data.Set                (Set)
@@ -43,7 +43,7 @@ eraseCurrentImplicationVariables = do
 
 learnClause :: CNF.Clause -> DPLL ()
 learnClause c = do
-  clauses %= (c <|)
+  clauses %= (|> c)
 
 dropLevel :: DPLL (Maybe (Maybe CNF.Variable, Set CNF.Variable))
 dropLevel = do
