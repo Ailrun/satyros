@@ -1,7 +1,7 @@
 {-# LANGUAGE ViewPatterns #-}
-{-# OPTIONS_GHC -Wno-deferred-out-of-scope-variables #-}
 module Satyros.DPLL where
 
+import           Control.Lens           ((^.))
 import           Control.Monad.Except   (ExceptT, runExceptT, throwError)
 import           Control.Monad.Extra    (forM_, ifM, unless, when)
 import           Control.Monad.Reader   (ReaderT (runReaderT), asks, lift)

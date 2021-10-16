@@ -2,7 +2,8 @@ module Satyros.DPLL.Assignment where
 
 import           Control.Lens (At (at), Index, IxValue, Ixed, Traversal',
                                Wrapped (Unwrapped, _Wrapped'), _1, _2, _Just,
-                               filtered, iso, (?~), (^.))
+                               from, iso, ix, (?~))
+import           Data.Bool    (bool)
 import           Data.Map     (Map)
 import qualified Data.Map     as Map
 import           Data.Set     (Set)
@@ -30,7 +31,7 @@ eraseVariables :: Set CNF.Variable -> Assignment -> Assignment
 eraseVariables xs = Assignment . flip Map.withoutKeys xs . getAssignment
 
 valueOfLiteral :: CNF.Literal -> Traversal' Assignment Bool
-valueOfLiteral (CNF.Literal v x) = at x . _Just . _1 . filtered (== v ^. CNF.isPositive)
+valueOfLiteral (CNF.Literal v x) = ix x . _1 . from CNF.isPositive . iso (== v) (bool (CNF.negatePositivity v) v)
 
 parentsOfLiteral :: CNF.Literal -> Traversal' Assignment (Maybe CNF.Clause)
 parentsOfLiteral (CNF.Literal _ x) = at x . _Just . _2
