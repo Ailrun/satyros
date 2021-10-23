@@ -30,8 +30,11 @@ assignVariable (CNF.Literal CNF.Negative x) p = at x ?~ (False, p)
 eraseVariables :: Set CNF.Variable -> Assignment -> Assignment
 eraseVariables xs = Assignment . flip Map.withoutKeys xs . getAssignment
 
+valueOfVariable :: CNF.Variable -> Traversal' Assignment Bool
+valueOfVariable x = ix x . _1
+
 valueOfLiteral :: CNF.Literal -> Traversal' Assignment Bool
-valueOfLiteral (CNF.Literal v x) = ix x . _1 . from CNF.isPositive . iso (== v) (bool (CNF.negatePositivity v) v)
+valueOfLiteral (CNF.Literal v x) = valueOfVariable x . from CNF.isPositive . iso (== v) (bool (CNF.negatePositivity v) v)
 
 parentsOfLiteral :: CNF.Literal -> Traversal' Assignment (Maybe CNF.Clause)
 parentsOfLiteral (CNF.Literal _ x) = at x . _Just . _2
