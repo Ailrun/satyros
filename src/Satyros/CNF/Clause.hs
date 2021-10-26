@@ -1,6 +1,9 @@
+{-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE TemplateHaskell #-}
 module Satyros.CNF.Clause
-  ( Clause(Clause)
+  ( ClauseLike(Clause, ClauseLike)
+  , Clause
+  , entriesOfClauseLike
   , literalsOfClause
   , emptyClause
   , unitClause
@@ -11,13 +14,23 @@ import           Control.Lens         (Iso', _Wrapped, makeWrapped)
 import           Satyros.CNF.Literal  (Literal, literalToVariable)
 import           Satyros.CNF.Variable (Variable)
 
-newtype Clause = Clause { _literalsOfClause :: [Literal] }
+newtype ClauseLike a = ClauseLike { _literalsOfClause :: [a] }
   deriving newtype (Show, Semigroup, Monoid)
 
-makeWrapped ''Clause
+makeWrapped ''ClauseLike
+
+type Clause = ClauseLike Literal
+
+pattern Clause :: [Literal] -> Clause
+pattern Clause v = ClauseLike v
+{-# COMPLETE Clause #-}
+
+entriesOfClauseLike :: Iso' (ClauseLike a) [a]
+entriesOfClauseLike = _Wrapped
+{-# INLINE entriesOfClauseLike #-}
 
 literalsOfClause :: Iso' Clause [Literal]
-literalsOfClause = _Wrapped
+literalsOfClause = entriesOfClauseLike
 {-# INLINE literalsOfClause #-}
 
 emptyClause :: Clause -> Bool
