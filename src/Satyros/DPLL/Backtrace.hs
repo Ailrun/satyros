@@ -13,7 +13,7 @@ import           Satyros.DPLL.StorageUtil (assignFailureDrivenVariable,
                                            learnClause, levelToSet)
 import           System.Random.Stateful   (StateGenM (StateGenM), randomRM)
 
-backtrace :: CNF.Clause -> DPLL ()
+backtrace :: CNF.Clause -> DPLL s ()
 backtrace cdc = do
   learnClause cdc
   dropIrrelevantLevels cdc
@@ -35,5 +35,5 @@ backtrace cdc = do
       backtraceComplete cdc l
     Nothing -> backtraceExhaustion
 
-backtraceCompleteHandler :: CNF.Clause -> CNF.Literal -> DPLL ()
+backtraceCompleteHandler :: CNF.Clause -> CNF.Literal -> DPLL s ()
 backtraceCompleteHandler c l = assignFailureDrivenVariable l c

@@ -31,7 +31,7 @@ test = go (bcp, testStorage)
           go p'
         Nothing -> putStrLn "finished"
 
-testLoop :: (DPLL (), Storage) -> IO (Maybe (DPLL (), Storage))
+testLoop :: (DPLL () (), Storage ()) -> IO (Maybe (DPLL () (), Storage ()))
 testLoop (d0, s0) =
   case stepDPLL d0 s0 of
     (Free eff1, s1) -> do
@@ -40,7 +40,7 @@ testLoop (d0, s0) =
       pure $ Just (testHandler eff1, s1)
     (Pure _, _)     -> pure Nothing
 
-testHandler :: DPLLF (DPLL ()) -> DPLL ()
+testHandler :: DPLLF (DPLL () ()) -> DPLL () ()
 testHandler (BCPUnitClause c l r) = bcpUnitClauseHandler c l >> r
 testHandler (BCPConflict c r) = bcpConflictRelSATHandler c >> r
 testHandler (BCPConflictDrivenClause c r) = backtrace c >> r
@@ -49,7 +49,7 @@ testHandler DecisionComplete = pure ()
 testHandler BacktraceExhaustion = pure ()
 testHandler (BacktraceComplete c l) = backtraceCompleteHandler c l >> decision
 
-testStorage :: Storage
+testStorage :: Storage ()
 testStorage =
   Storage
   { _unassignedVariables = Set.fromList [CNF.Variable 4]
@@ -66,25 +66,5 @@ testStorage =
   , _assignment = Assignment (Map.fromList [(CNF.Variable 3, (True, Nothing)), (CNF.Variable 2, (True, Nothing)), (CNF.Variable 1, (False, Nothing))])
   , _variableLevels = [(Just (CNF.Variable 3), Set.empty), (Just (CNF.Variable 1), Set.singleton (CNF.Variable 2))]
   , _stdGen = mkStdGen 0
+  , _theory = ()
   }
-
-bcpTrial :: (FreeF DPLLF () (DPLL ()), Storage)
-bcpTrial = stepDPLL bcp myState
-  where
-    myState =
-      Storage
-      { _unassignedVariables = Set.fromList [CNF.Variable 4]
-      , _clauses = Vector.fromList
-                   [ CNF.Clause
-                     [CNF.Literal CNF.Positive (CNF.Variable 1), CNF.Literal CNF.Positive (CNF.Variable 2)]
-                   , CNF.Clause
-                     [CNF.Literal CNF.Positive (CNF.Variable 1), CNF.Literal CNF.Positive (CNF.Variable 3), CNF.Literal CNF.Positive (CNF.Variable 4)]
-                   , CNF.Clause
-                     [CNF.Literal CNF.Negative (CNF.Variable 2), CNF.Literal CNF.Negative (CNF.Variable 3), CNF.Literal CNF.Positive (CNF.Variable 4)]
-                   , CNF.Clause
-                     [CNF.Literal CNF.Negative (CNF.Variable 2), CNF.Literal CNF.Negative (CNF.Variable 4)]
-                   ]
-      , _assignment = Assignment (Map.fromList [(CNF.Variable 3, (True, Nothing)), (CNF.Variable 2, (True, Nothing)), (CNF.Variable 1, (False, Nothing))])
-      , _variableLevels = [(Just (CNF.Variable 3), Set.empty), (Just (CNF.Variable 1), Set.singleton (CNF.Variable 2))]
-      , _stdGen = mkStdGen 0
-      }

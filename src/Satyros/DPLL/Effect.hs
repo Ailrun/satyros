@@ -12,19 +12,19 @@ import qualified Satyros.CNF                as CNF
 import           Satyros.DPLL.Storage       (Storage)
 import           Satyros.Util               (showsTernaryWith)
 
-newtype DPLL a = DPLL{ runDPLL :: FreeT DPLLF (State Storage) a }
-  deriving newtype (Functor, Applicative, Monad, MonadFree DPLLF, MonadState Storage)
+newtype DPLL s a = DPLL{ runDPLL :: FreeT DPLLF (State (Storage s)) a }
+  deriving newtype (Functor, Applicative, Monad, MonadFree DPLLF, MonadState (Storage s))
 
-instance Show1 DPLL where
+instance Show1 (DPLL s) where
   liftShowsPrec sp slp d =
     showsUnaryWith (liftShowsPrec sp slp) "DPLL" d
     . hoistFreeT (const $ Const "<stateful computation>")
     . runDPLL
 
-instance (Show a) => Show (DPLL a) where
+instance (Show a) => Show (DPLL s a) where
   showsPrec = showsPrec1
 
-stepDPLL :: DPLL a -> Storage -> (FreeF DPLLF a (DPLL a), Storage)
+stepDPLL :: DPLL s a -> Storage s -> (FreeF DPLLF a (DPLL s a), Storage s)
 stepDPLL d s = first (fmap DPLL) $ runState (runFreeT (runDPLL d)) s
 {-# INLINE stepDPLL #-}
 
@@ -47,30 +47,30 @@ instance Show1 DPLLF where
   liftShowsPrec _  _ _ BacktraceExhaustion = showString "BacktraceExhaustion"
   liftShowsPrec _  _ d (BacktraceComplete c l) = showsBinaryWith showsPrec showsPrec "BacktraceComplete" d c l
 
-bcpUnitClause :: CNF.Clause -> CNF.Literal -> DPLL ()
+bcpUnitClause :: CNF.Clause -> CNF.Literal -> DPLL s ()
 bcpUnitClause c l = wrap . BCPUnitClause c l $ pure ()
 {-# INLINE bcpUnitClause #-}
 
-bcpConflict :: CNF.Clause -> DPLL ()
+bcpConflict :: CNF.Clause -> DPLL s ()
 bcpConflict c = wrap . BCPConflict c $ pure ()
 {-# INLINE bcpConflict #-}
 
-bcpConflictDrivenClause :: CNF.Clause -> DPLL ()
+bcpConflictDrivenClause :: CNF.Clause -> DPLL s ()
 bcpConflictDrivenClause c = wrap . BCPConflictDrivenClause c $ pure ()
 {-# INLINE bcpConflictDrivenClause #-}
 
-decisionResult :: CNF.Literal -> DPLL ()
+decisionResult :: CNF.Literal -> DPLL s ()
 decisionResult = wrap . DecisionResult
 {-# INLINE decisionResult #-}
 
-decisionComplete :: DPLL ()
+decisionComplete :: DPLL s ()
 decisionComplete = wrap DecisionComplete
 {-# INLINE decisionComplete #-}
 
-backtraceExhaustion :: DPLL ()
+backtraceExhaustion :: DPLL s ()
 backtraceExhaustion = wrap BacktraceExhaustion
 {-# INLINE backtraceExhaustion #-}
 
-backtraceComplete :: CNF.Clause -> CNF.Literal -> DPLL ()
+backtraceComplete :: CNF.Clause -> CNF.Literal -> DPLL s ()
 backtraceComplete c = wrap . BacktraceComplete c
 {-# INLINE backtraceComplete #-}

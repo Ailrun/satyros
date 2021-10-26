@@ -16,7 +16,7 @@ import           Satyros.DPLL.Storage     (assignment, clauses)
 import           Satyros.DPLL.StorageUtil (assignImplicationVariable,
                                            deriveConflictClauseRelSAT)
 
-bcp :: DPLL ()
+bcp :: DPLL s ()
 bcp = do
   cls <- use clauses
   eitherM id pure . runExceptT $
@@ -37,10 +37,10 @@ bcp = do
       where
         v = asgn ^? valueOfLiteral l
 
-bcpUnitClauseHandler :: CNF.Clause -> CNF.Literal -> DPLL ()
+bcpUnitClauseHandler :: CNF.Clause -> CNF.Literal -> DPLL s ()
 bcpUnitClauseHandler c l = assignImplicationVariable l c
 
-bcpConflictRelSATHandler :: CNF.Clause -> DPLL ()
+bcpConflictRelSATHandler :: CNF.Clause -> DPLL s ()
 bcpConflictRelSATHandler c = do
   cdc <- deriveConflictClauseRelSAT c
   bcpConflictDrivenClause cdc

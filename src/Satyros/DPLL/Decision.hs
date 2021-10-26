@@ -10,7 +10,7 @@ import           Satyros.DPLL.StorageUtil (assignDecisionVariable)
 import           System.Random.Stateful   (StateGenM (StateGenM), randomM,
                                            randomRM)
 
-decision :: DPLL ()
+decision :: DPLL s ()
 decision = do
   xs <- use unassignedVariables
   if Set.null xs
@@ -22,5 +22,5 @@ decision = do
         . CNF.Literal s
         $ Set.toList xs !! i
 
-decisionResultHandler :: CNF.Literal -> DPLL ()
+decisionResultHandler :: CNF.Literal -> DPLL s ()
 decisionResultHandler = assignDecisionVariable

@@ -10,19 +10,20 @@ import qualified Satyros.CNF             as CNF
 import           Satyros.DPLL.Assignment (Assignment)
 import           System.Random           (RandomGen (..), StdGen)
 
-data Storage
+data Storage s
   = Storage
     { _unassignedVariables :: Set CNF.Variable
     , _clauses             :: Vector CNF.Clause
     , _assignment          :: Assignment
     , _variableLevels      :: [(Maybe CNF.Variable, Set CNF.Variable)]
     , _stdGen              :: StdGen
+    , _theory              :: s
     }
   deriving stock (Show)
 
 makeFieldsNoPrefix ''Storage
 
-instance RandomGen Storage where
+instance RandomGen (Storage s) where
   split s =
     let
       (stdGen0, stdGen1) = s ^. stdGen . to split

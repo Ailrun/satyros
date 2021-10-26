@@ -33,7 +33,7 @@ dpll' f stdGen =
     Left e  -> (Left e, stdGen)
     Right s -> loop s & _2 %~ (^. DPLL.stdGen)
 
-loop :: DPLL.Storage -> (Either DPLLFailure [Bool], DPLL.Storage)
+loop :: DPLL.Storage s -> (Either DPLLFailure [Bool], DPLL.Storage s)
 loop = go (DPLL.bcp >> pure (Left (DPLLException "Post-BCP continuation should not be reachable")))
   where
     go d s =
@@ -43,7 +43,7 @@ loop = go (DPLL.bcp >> pure (Left (DPLLException "Post-BCP continuation should n
 
 -- |
 -- Initialize DPLL database and resolve trivial error cases / unit clauses.
-initialize :: CNF.Formula -> StdGen -> Either DPLLFailure DPLL.Storage
+initialize :: CNF.Formula -> StdGen -> Either DPLLFailure (DPLL.Storage ())
 initialize f stdGen = do
   when (notNull emptyCs) $
     throwError $ DPLLUnsatisfiable "Empty clauses are detected. Is this really intended?"
@@ -58,6 +58,7 @@ initialize f stdGen = do
     _assignment = DPLL.Assignment $ Map.fromList initialAssignmentPairs
     _variableLevels = [(Nothing, initiallyAssignedVs)]
     _stdGen = stdGen
+    _theory = ()
 
     allVariables = Set.fromList $ fmap CNF.Variable [1..mv]
     CNF.Variable mv = CNF.maxVariableInFormula f
@@ -71,7 +72,7 @@ initialize f stdGen = do
     (emptyCs, nonemptyCs) = partition CNF.emptyClause cs
     cs = f ^. CNF.clausesOfFormula
 
-naiveHandler :: DPLLF (DPLL (Either DPLLFailure [Bool])) -> DPLL (Either DPLLFailure [Bool])
+naiveHandler :: DPLLF (DPLL s (Either DPLLFailure [Bool])) -> DPLL s (Either DPLLFailure [Bool])
 naiveHandler (DPLL.BCPUnitClause c l r) = DPLL.bcpUnitClauseHandler c l >> r
 naiveHandler (DPLL.BCPConflict c r) = DPLL.bcpConflictRelSATHandler c >> r
 naiveHandler (DPLL.BCPConflictDrivenClause c r) = DPLL.backtrace c >> r
