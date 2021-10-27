@@ -16,36 +16,36 @@ import           Satyros.DPLL.Effect     (DPLL)
 import           Satyros.DPLL.Storage    (assignment, clauses,
                                           unassignedVariables, variableLevels)
 
-assignDecisionVariable :: CNF.Literal -> DPLL s ()
+assignDecisionVariable :: (Functor f) => CNF.Literal -> DPLL s f ()
 assignDecisionVariable l@(CNF.Literal _ x) = do
   variableLevels %= ((Just x, Set.empty) <|)
   unassignedVariables %= Set.delete x
   assignment %= assignVariable l Nothing
 
-assignImplicationVariable :: CNF.Literal -> CNF.Clause -> DPLL s ()
+assignImplicationVariable :: (Functor f) => CNF.Literal -> CNF.Clause -> DPLL s f ()
 assignImplicationVariable l@(CNF.Literal _ x) c = do
   variableLevels . ix 0 . _2 %= Set.insert x
   unassignedVariables %= Set.delete x
   assignment %= assignVariable l (Just c)
 
-assignFailureDrivenVariable :: CNF.Literal -> CNF.Clause -> DPLL s ()
+assignFailureDrivenVariable :: (Functor f) => CNF.Literal -> CNF.Clause -> DPLL s f ()
 assignFailureDrivenVariable l@(CNF.Literal _ x) c = do
   variableLevels %= ((Nothing, Set.singleton x) <|)
   unassignedVariables %= Set.delete x
   assignment %= assignVariable l (Just c)
 
-eraseCurrentImplicationVariables :: DPLL s ()
+eraseCurrentImplicationVariables :: (Functor f) => DPLL s f ()
 eraseCurrentImplicationVariables = do
   xs <- use (variableLevels . to head . _2)
   variableLevels . ix 0 . _2 .= Set.empty
   unassignedVariables %= Set.union xs
   assignment %= eraseVariables xs
 
-learnClause :: CNF.Clause -> DPLL s ()
+learnClause :: (Functor f) => CNF.Clause -> DPLL s f ()
 learnClause c = do
   clauses %= (|> c)
 
-dropLevel :: DPLL s (Maybe (Maybe CNF.Variable, Set CNF.Variable))
+dropLevel :: (Functor f) => DPLL s f (Maybe (Maybe CNF.Variable, Set CNF.Variable))
 dropLevel = do
   lvs <- use variableLevels
   case lvs of
@@ -56,7 +56,7 @@ dropLevel = do
       assignment %= eraseVariables xs
       pure $ Just h
 
-dropIrrelevantLevels :: CNF.Clause -> DPLL s ()
+dropIrrelevantLevels :: (Functor f) => CNF.Clause -> DPLL s f ()
 dropIrrelevantLevels c = do
   let
     cxs = c ^.. CNF.literalsOfClause . each . to CNF.literalToVariable & Set.fromList
@@ -67,7 +67,7 @@ dropIrrelevantLevels c = do
   unassignedVariables %= Set.union xs
   assignment %= eraseVariables xs
 
-deriveConflictClauseRelSAT :: CNF.Clause -> DPLL s CNF.Clause
+deriveConflictClauseRelSAT :: (Functor f) => CNF.Clause -> DPLL s f CNF.Clause
 deriveConflictClauseRelSAT c = do
   asgn <- use assignment
   (_, vl) <- uses variableLevels head

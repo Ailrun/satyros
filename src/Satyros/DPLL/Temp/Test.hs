@@ -5,9 +5,11 @@ Convert this into a test case
 module Satyros.DPLL.Temp.Test where
 
 import           Control.Monad.Trans.Free (FreeF (Free, Pure))
+import           Data.Functor.Const       (Const (Const))
 import qualified Data.Map                 as Map
 import qualified Data.Set                 as Set
 import qualified Data.Vector              as Vector
+import           Data.Void                (Void, absurd)
 import qualified Satyros.CNF              as CNF
 import           Satyros.DPLL.Assignment  (Assignment (Assignment))
 import           Satyros.DPLL.BCP         (bcp, bcpConflictRelSATHandler,
@@ -31,7 +33,7 @@ test = go (bcp, testStorage)
           go p'
         Nothing -> putStrLn "finished"
 
-testLoop :: (DPLL () (), Storage ()) -> IO (Maybe (DPLL () (), Storage ()))
+testLoop :: (DPLL () (Const Void) (), Storage ()) -> IO (Maybe (DPLL () (Const Void) (), Storage ()))
 testLoop (d0, s0) =
   case stepDPLL d0 s0 of
     (Free eff1, s1) -> do
@@ -40,7 +42,7 @@ testLoop (d0, s0) =
       pure $ Just (testHandler eff1, s1)
     (Pure _, _)     -> pure Nothing
 
-testHandler :: DPLLF (DPLL () ()) -> DPLL () ()
+testHandler :: DPLLF (Const Void) (DPLL () (Const Void) ()) -> DPLL () (Const Void) ()
 testHandler (BCPUnitClause c l r) = bcpUnitClauseHandler c l >> r
 testHandler (BCPConflict c r) = bcpConflictRelSATHandler c >> r
 testHandler (BCPConflictDrivenClause c r) = backtrace c >> r
@@ -48,6 +50,7 @@ testHandler (DecisionResult l) = decisionResultHandler l >> bcp
 testHandler DecisionComplete = pure ()
 testHandler BacktraceExhaustion = pure ()
 testHandler (BacktraceComplete c l) = backtraceCompleteHandler c l >> decision
+testHandler (InsideDPLL (Const x)) = absurd x
 
 testStorage :: Storage ()
 testStorage =

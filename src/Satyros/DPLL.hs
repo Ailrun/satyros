@@ -6,10 +6,12 @@ import           Control.Lens             (_2, each, uses, (%~), (&), (^.),
 import           Control.Monad.Except     (throwError)
 import           Control.Monad.Extra      (forM_, when)
 import           Control.Monad.Trans.Free (FreeF (Free, Pure))
+import           Data.Functor.Const       (Const (Const))
 import           Data.List.Extra          (notNull, partition)
 import qualified Data.Map                 as Map
 import qualified Data.Set                 as Set
 import qualified Data.Vector              as Vector
+import           Data.Void                (Void, absurd)
 import qualified Satyros.CNF              as CNF
 import qualified Satyros.DPLL.Assignment  as DPLL
 import qualified Satyros.DPLL.BCP         as DPLL
@@ -72,7 +74,7 @@ initialize f stdGen = do
     (emptyCs, nonemptyCs) = partition CNF.emptyClause cs
     cs = f ^. CNF.clausesOfFormula
 
-naiveHandler :: DPLLF (DPLL s (Either DPLLFailure [Bool])) -> DPLL s (Either DPLLFailure [Bool])
+naiveHandler :: DPLLF (Const Void) (DPLL s (Const Void) (Either DPLLFailure [Bool])) -> DPLL s (Const Void) (Either DPLLFailure [Bool])
 naiveHandler (DPLL.BCPUnitClause c l r) = DPLL.bcpUnitClauseHandler c l >> r
 naiveHandler (DPLL.BCPConflict c r) = DPLL.bcpConflictRelSATHandler c >> r
 naiveHandler (DPLL.BCPConflictDrivenClause c r) = DPLL.backtrace c >> r
@@ -80,3 +82,4 @@ naiveHandler (DPLL.DecisionResult l) = DPLL.decisionResultHandler l >> DPLL.bcp 
 naiveHandler DPLL.DecisionComplete = uses DPLL.assignment $ Right . fmap fst . Map.elems . DPLL.getAssignment
 naiveHandler DPLL.BacktraceExhaustion = pure . Left $ DPLLUnsatisfiable "Possibilities are exhausted"
 naiveHandler (DPLL.BacktraceComplete c l) = DPLL.backtraceCompleteHandler c l >> DPLL.decision >> pure (Left (DPLLException "Post-decision continuation should not be reachable"))
+naiveHandler (DPLL.InsideDPLL (Const x)) = absurd x

@@ -1,7 +1,8 @@
+{-# LANGUAGE QuantifiedConstraints #-}
 module Satyros.DPLL.Effect where
 
 import           Control.Monad.State.Strict (MonadState, State, runState)
-import           Control.Monad.Trans.Free   (FreeF, FreeT (runFreeT),
+import           Control.Monad.Trans.Free   (FreeF, FreeT (runFreeT, FreeT),
                                              MonadFree (wrap), hoistFreeT)
 import           Data.Bifunctor             (first)
 import           Data.Functor.Classes       (Show1 (liftShowsPrec),
@@ -12,23 +13,36 @@ import qualified Satyros.CNF                as CNF
 import           Satyros.DPLL.Storage       (Storage)
 import           Satyros.Util               (showsTernaryWith)
 
-newtype DPLL s a = DPLL{ runDPLL :: FreeT DPLLF (State (Storage s)) a }
-  deriving newtype (Functor, Applicative, Monad, MonadFree DPLLF, MonadState (Storage s))
+newtype DPLL s f a = DPLL{ runDPLL :: FreeT (DPLLF f) (State (Storage s)) a }
+  deriving newtype (Functor, Applicative, Monad, MonadState (Storage s))
 
-instance Show1 (DPLL s) where
+instance (Functor f) => MonadFree (DPLLF f) (DPLL s f) where
+  wrap (BCPUnitClause c l r)         = DPLL . wrap $ BCPUnitClause c l $ runDPLL r
+  wrap (BCPConflict c r)             = DPLL . wrap $ BCPConflict c $ runDPLL r
+  wrap (BCPConflictDrivenClause c r) = DPLL . wrap $ BCPConflictDrivenClause c $ runDPLL r
+  wrap (DecisionResult l)            = DPLL . wrap $ DecisionResult l
+  wrap DecisionComplete              = DPLL . wrap $ DecisionComplete
+  wrap BacktraceExhaustion           = DPLL . wrap $ BacktraceExhaustion
+  wrap (BacktraceComplete c l)       = DPLL . wrap $ BacktraceComplete c l
+  wrap (InsideDPLL inner)            = DPLL . wrap $ InsideDPLL $ fmap runDPLL inner
+  {-# INLINE wrap #-}
+
+instance (Show1 f, Functor f) => Show1 (DPLL s f) where
   liftShowsPrec sp slp d =
     showsUnaryWith (liftShowsPrec sp slp) "DPLL" d
     . hoistFreeT (const $ Const "<stateful computation>")
     . runDPLL
+  {-# INLINE liftShowsPrec #-}
 
-instance (Show a) => Show (DPLL s a) where
+instance (Show1 f, Functor f, Show a) => Show (DPLL s f a) where
   showsPrec = showsPrec1
+  {-# INLINE showsPrec #-}
 
-stepDPLL :: DPLL s a -> Storage s -> (FreeF DPLLF a (DPLL s a), Storage s)
+stepDPLL :: (Functor f) => DPLL s f a -> Storage s -> (FreeF (DPLLF f) a (DPLL s f a), Storage s)
 stepDPLL d s = first (fmap DPLL) $ runState (runFreeT (runDPLL d)) s
 {-# INLINE stepDPLL #-}
 
-data DPLLF r
+data DPLLF f r
   = BCPUnitClause CNF.Clause CNF.Literal r
   | BCPConflict CNF.Clause r
   | BCPConflictDrivenClause CNF.Clause r
@@ -36,41 +50,44 @@ data DPLLF r
   | DecisionComplete
   | BacktraceExhaustion
   | BacktraceComplete CNF.Clause CNF.Literal
+  | InsideDPLL (f r)
   deriving stock (Show, Functor)
 
-instance Show1 DPLLF where
-  liftShowsPrec sp _ d (BCPUnitClause c l r) = showsTernaryWith showsPrec showsPrec sp "BCPUnitClause" d c l r
-  liftShowsPrec sp _ d (BCPConflict c r) = showsBinaryWith showsPrec sp "BCPConflict" d c r
-  liftShowsPrec sp _ d (BCPConflictDrivenClause c r) = showsBinaryWith showsPrec sp "BCPConflictDrivenClause" d c r
-  liftShowsPrec _  _ d (DecisionResult l) = showsUnaryWith showsPrec "DecisionResult" d l
-  liftShowsPrec _  _ _ DecisionComplete = showString "DecisionComplete"
-  liftShowsPrec _  _ _ BacktraceExhaustion = showString "BacktraceExhaustion"
-  liftShowsPrec _  _ d (BacktraceComplete c l) = showsBinaryWith showsPrec showsPrec "BacktraceComplete" d c l
+instance (Show1 f, Functor f) => Show1 (DPLLF f) where
+  liftShowsPrec sp _   d (BCPUnitClause c l r) = showsTernaryWith showsPrec showsPrec sp "BCPUnitClause" d c l r
+  liftShowsPrec sp _   d (BCPConflict c r) = showsBinaryWith showsPrec sp "BCPConflict" d c r
+  liftShowsPrec sp _   d (BCPConflictDrivenClause c r) = showsBinaryWith showsPrec sp "BCPConflictDrivenClause" d c r
+  liftShowsPrec _  _   d (DecisionResult l) = showsUnaryWith showsPrec "DecisionResult" d l
+  liftShowsPrec _  _   _ DecisionComplete = showString "DecisionComplete"
+  liftShowsPrec _  _   _ BacktraceExhaustion = showString "BacktraceExhaustion"
+  liftShowsPrec _  _   d (BacktraceComplete c l) = showsBinaryWith showsPrec showsPrec "BacktraceComplete" d c l
+  liftShowsPrec sp lsp d (InsideDPLL inner) = showsUnaryWith (liftShowsPrec sp lsp) "InsideDPLL" d inner
+  {-# INLINE liftShowsPrec #-}
 
-bcpUnitClause :: CNF.Clause -> CNF.Literal -> DPLL s ()
+bcpUnitClause :: (Functor f) => CNF.Clause -> CNF.Literal -> DPLL s f ()
 bcpUnitClause c l = wrap . BCPUnitClause c l $ pure ()
 {-# INLINE bcpUnitClause #-}
 
-bcpConflict :: CNF.Clause -> DPLL s ()
+bcpConflict :: (Functor f) => CNF.Clause -> DPLL s f ()
 bcpConflict c = wrap . BCPConflict c $ pure ()
 {-# INLINE bcpConflict #-}
 
-bcpConflictDrivenClause :: CNF.Clause -> DPLL s ()
+bcpConflictDrivenClause :: (Functor f) => CNF.Clause -> DPLL s f ()
 bcpConflictDrivenClause c = wrap . BCPConflictDrivenClause c $ pure ()
 {-# INLINE bcpConflictDrivenClause #-}
 
-decisionResult :: CNF.Literal -> DPLL s ()
+decisionResult :: (Functor f) => CNF.Literal -> DPLL s f ()
 decisionResult = wrap . DecisionResult
 {-# INLINE decisionResult #-}
 
-decisionComplete :: DPLL s ()
+decisionComplete :: (Functor f) => DPLL s f ()
 decisionComplete = wrap DecisionComplete
 {-# INLINE decisionComplete #-}
 
-backtraceExhaustion :: DPLL s ()
+backtraceExhaustion :: (Functor f) => DPLL s f ()
 backtraceExhaustion = wrap BacktraceExhaustion
 {-# INLINE backtraceExhaustion #-}
 
-backtraceComplete :: CNF.Clause -> CNF.Literal -> DPLL s ()
+backtraceComplete :: (Functor f) => CNF.Clause -> CNF.Literal -> DPLL s f ()
 backtraceComplete c = wrap . BacktraceComplete c
 {-# INLINE backtraceComplete #-}
