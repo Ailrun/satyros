@@ -49,7 +49,7 @@ initialize :: CNF.Formula -> StdGen -> Either DPLLFailure (DPLL.Storage ())
 initialize f stdGen = do
   when (notNull emptyCs) $
     throwError $ DPLLUnsatisfiable "Empty clauses are detected. Is this really intended?"
-  forM_ initialAssignmentPairs $ \(x, fst -> b) ->
+  forM_ initialAssignmentPairs $ \(x, not . fst -> b) ->
     when (_assignment ^? DPLL.valueOfVariable x == Just b) $
       throwError $ DPLLUnsatisfiable "The initial constraint derives a conflict"
 

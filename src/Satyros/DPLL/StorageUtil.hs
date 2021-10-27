@@ -50,6 +50,7 @@ dropLevel = do
   lvs <- use variableLevels
   case lvs of
     [] -> pure Nothing
+    [_] -> pure Nothing
     h@(levelToSet -> xs) : t -> do
       variableLevels .= t
       unassignedVariables %= Set.union xs

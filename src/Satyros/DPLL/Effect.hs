@@ -2,7 +2,7 @@
 module Satyros.DPLL.Effect where
 
 import           Control.Monad.State.Strict (MonadState, State, runState)
-import           Control.Monad.Trans.Free   (FreeF, FreeT (runFreeT, FreeT),
+import           Control.Monad.Trans.Free   (FreeF, FreeT (FreeT, runFreeT),
                                              MonadFree (wrap), hoistFreeT)
 import           Data.Bifunctor             (first)
 import           Data.Functor.Classes       (Show1 (liftShowsPrec),
