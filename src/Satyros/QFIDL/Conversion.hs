@@ -1,11 +1,12 @@
 {-# LANGUAGE ViewPatterns #-}
 module Satyros.QFIDL.Conversion
-  ( toCNF
-  , negateExpressed
+  ( ConversionTable
+  , toCNF
+  , fromAssignment
   ) where
 
 import           Control.Applicative       (liftA2)
-import           Control.Lens              (_1, over, view)
+import           Control.Lens              (_1, at, over, view, (&), (?~), (^.))
 import           Data.Coerce               (coerce)
 import           Data.List                 (mapAccumL)
 import           Data.Map                  (Map)
@@ -17,24 +18,31 @@ import           Satyros.QFIDL.Expressed   (Expressed (..))
 import           Satyros.QFIDL.Expressible (Expressible (..), Operator (..))
 import           Satyros.QFIDL.Variable    (Variable (Variable))
 
-toCNF :: CNF.FormulaLike Expressible -> (CNF.Formula, Map CNF.Variable Expressed)
+type ConversionTable = (Map CNF.Variable Expressed, Map Expressed CNF.Literal)
+
+toCNF :: CNF.FormulaLike Expressible -> (CNF.Formula, ConversionTable)
 toCNF = coerce $ swap . toCNF'
   where
-    toCNF' :: [CNF.ClauseLike Expressible] -> (Map CNF.Variable Expressed, [CNF.Clause])
+    toCNF' :: [CNF.ClauseLike Expressible] -> (ConversionTable, [CNF.Clause])
     toCNF' =
       coerce
-        ( over _1 (Map.fromList . view _1)
-          . mapAccumL @[] (mapAccumL @[] go) ([], Map.empty, CNF.Variable <$> [1..])
+        ( over _1 (view _1)
+          . mapAccumL @[] (mapAccumL @[] go) ((Map.empty, Map.empty), CNF.Variable <$> [1..])
         )
       . concatMap transformClauseLike
 
-    go :: ([(CNF.Variable, Expressed)], Map Expressed CNF.Variable, [CNF.Variable])
+    go :: (ConversionTable, [CNF.Variable])
        -> Expressed
-       -> (([(CNF.Variable, Expressed)], Map Expressed CNF.Variable, [CNF.Variable]), CNF.Literal)
-    go s@(ve, e2v, newVs) e
-      | Just v <- Map.lookup e e2v = (s, CNF.Literal CNF.Positive v)
-      | newV:newVs' <- newVs       = (((newV, e):ve, Map.insert e newV e2v, newVs'), CNF.Literal CNF.Positive newV)
+       -> ((ConversionTable, [CNF.Variable]), CNF.Literal)
+    go s@((v2e, e2l), newVs) e
+      | Just l <- Map.lookup e e2l = (s, l)
+      | newV:newVs' <- newVs       = (((v2e & at newV ?~ e , e2l & at e ?~ CNF.Literal CNF.Positive newV & at (negateExpressed e) ?~ CNF.Literal CNF.Negative newV), newVs'), CNF.Literal CNF.Positive newV)
       | otherwise                  = error "toCNF: impossible case!"
+
+fromAssignment :: Map CNF.Variable Expressed -> CNF.Literal -> Expressed
+fromAssignment m (CNF.Literal p ((m Map.!) -> e))
+  | p ^. CNF.isPositive = e
+  | otherwise           = negateExpressed e
 
 negateExpressed :: Expressed -> Expressed
 negateExpressed (LessThanEqualTo v1 v2 n) = LessThanEqualTo v2 v1 (- n - 1)

@@ -1,6 +1,6 @@
 module Satyros.BellmanFord.Effect where
 
-import           Control.Monad.State          (MonadState, State, runState)
+import           Control.Monad.State.Strict   (MonadState, State, runState)
 import           Control.Monad.Trans.Free     (FreeF, FreeT (runFreeT),
                                                MonadFree (wrap), hoistFreeT)
 import           Data.Bifunctor               (first)
@@ -8,9 +8,9 @@ import           Data.Functor.Classes         (Show1 (liftShowsPrec),
                                                showsBinaryWith, showsPrec1,
                                                showsUnaryWith)
 import           Data.Functor.Const           (Const (Const))
-import           Satyros.BellmanFord.IDLGraph (IDLGraphVertex,
-                                               IDLWeightMap,
+import           Satyros.BellmanFord.IDLGraph (IDLGraphVertex, IDLWeightMap,
                                                PositiveInfiniteInt)
+import qualified Satyros.QFIDL                as QFIDL
 import           Satyros.Util                 (showsTernaryWith)
 
 type BellmanFordStore = IDLWeightMap
@@ -31,45 +31,45 @@ stepBellmanFord d s = first (fmap BellmanFord) $ runState (runFreeT (runBellmanF
 {-# INLINE stepBellmanFord #-}
 
 data BellmanFordF r
-  = LoopCheck (IDLGraphVertex, IDLGraphVertex) r
-  | LoopFindShorter IDLGraphVertex (IDLGraphVertex, PositiveInfiniteInt) r
-  | LoopNth Int r
-  | LoopEnd
+  = PropagationCheck (IDLGraphVertex, IDLGraphVertex) r
+  | PropagationFindShorter IDLGraphVertex (IDLGraphVertex, PositiveInfiniteInt) r
+  | PropagationNth Int r
+  | PropagationEnd
   | NegativeCycleCheck (IDLGraphVertex, IDLGraphVertex) r
-  | NegativeCycleFind [(IDLGraphVertex, IDLGraphVertex, Int)]
+  | NegativeCycleFind [QFIDL.Expressed]
   | NegativeCyclePass
   deriving stock (Show, Functor)
 
 instance Show1 BellmanFordF where
-  liftShowsPrec sp _ d (LoopCheck vs r) = showsBinaryWith showsPrec sp "LoopCheck" d vs r
-  liftShowsPrec sp _ d (LoopFindShorter v p r) = showsTernaryWith showsPrec showsPrec sp "LoopFindShorter" d v p r
-  liftShowsPrec sp _ d (LoopNth n r) = showsBinaryWith showsPrec sp "LoopNth" d n r
-  liftShowsPrec _  _ _ LoopEnd = showString "LoopEnd"
+  liftShowsPrec sp _ d (PropagationCheck vs r) = showsBinaryWith showsPrec sp "PropagationCheck" d vs r
+  liftShowsPrec sp _ d (PropagationFindShorter v p r) = showsTernaryWith showsPrec showsPrec sp "PropagationFindShorter" d v p r
+  liftShowsPrec sp _ d (PropagationNth n r) = showsBinaryWith showsPrec sp "PropagationNth" d n r
+  liftShowsPrec _  _ _ PropagationEnd = showString "PropagationEnd"
   liftShowsPrec sp _ d (NegativeCycleCheck vs r) = showsBinaryWith showsPrec sp "NegativeCycleCheck" d vs r
   liftShowsPrec _  _ d (NegativeCycleFind path) = showsUnaryWith showsPrec "NegativeCycleFind" d path
   liftShowsPrec _  _ _ NegativeCyclePass = showString "NegativeCyclePass"
 
-loopCheck :: (IDLGraphVertex, IDLGraphVertex) -> BellmanFord ()
-loopCheck vs = wrap . LoopCheck vs $ pure ()
-{-# INLINE loopCheck #-}
+propagationCheck :: (IDLGraphVertex, IDLGraphVertex) -> BellmanFord ()
+propagationCheck vs = wrap . PropagationCheck vs $ pure ()
+{-# INLINE propagationCheck #-}
 
-loopFindShorter :: IDLGraphVertex -> (IDLGraphVertex, PositiveInfiniteInt) -> BellmanFord ()
-loopFindShorter v p = wrap . LoopFindShorter v p $ pure ()
-{-# INLINE loopFindShorter #-}
+propagationFindShorter :: IDLGraphVertex -> (IDLGraphVertex, PositiveInfiniteInt) -> BellmanFord ()
+propagationFindShorter v p = wrap . PropagationFindShorter v p $ pure ()
+{-# INLINE propagationFindShorter #-}
 
-loopNth :: Int -> BellmanFord ()
-loopNth n = wrap . LoopNth n $ pure ()
-{-# INLINE loopNth #-}
+propagationNth :: Int -> BellmanFord ()
+propagationNth n = wrap . PropagationNth n $ pure ()
+{-# INLINE propagationNth #-}
 
-loopEnd :: BellmanFord ()
-loopEnd = wrap LoopEnd
-{-# INLINE loopEnd #-}
+propagationEnd :: BellmanFord ()
+propagationEnd = wrap PropagationEnd
+{-# INLINE propagationEnd #-}
 
 negativeCycleCheck :: (IDLGraphVertex, IDLGraphVertex) -> BellmanFord ()
 negativeCycleCheck vs = wrap . NegativeCycleCheck vs $ pure ()
 {-# INLINE negativeCycleCheck #-}
 
-negativeCycleFind :: [(IDLGraphVertex, IDLGraphVertex, Int)] -> BellmanFord ()
+negativeCycleFind :: [QFIDL.Expressed] -> BellmanFord ()
 negativeCycleFind = wrap . NegativeCycleFind
 {-# INLINE negativeCycleFind #-}
 

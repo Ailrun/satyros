@@ -10,6 +10,7 @@ import           Satyros.BellmanFord.Effect   (BellmanFord, negativeCycleCheck,
 import           Satyros.BellmanFord.IDLGraph (IDLGraph,
                                                PositiveInfiniteInt (Finite),
                                                addPositiveInfiniteInt)
+import qualified Satyros.QFIDL                as QFIDL
 
 negativeCycle :: IDLGraph -> BellmanFord ()
 negativeCycle graph = do
@@ -23,7 +24,7 @@ negativeCycle graph = do
   negativeCyclePass
   where
     getCycleFrom f p n
-      | f == p = pure [(p, n, graph Map.! (p, n))]
+      | f == p = pure [QFIDL.LessThanEqualTo (fromJust p) (fromJust n) (graph Map.! (p, n))]
       | otherwise = do
           (pp, _) <- uses (at p) fromJust
-          ((p, n, graph Map.! (p, n)) :) <$> getCycleFrom f pp p
+          (QFIDL.LessThanEqualTo (fromJust p) (fromJust n) (graph Map.! (p, n)) :) <$> getCycleFrom f pp p
