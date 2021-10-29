@@ -1,5 +1,5 @@
 {-# LANGUAGE ViewPatterns #-}
-module Satyros.DPLL where
+module DPLL where
 
 import           Control.Lens             (_2, each, uses, (%~), (&), (^.),
                                            (^..), (^?))

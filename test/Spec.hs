@@ -1,4 +1,4 @@
-module Spec where
+module Main where
 
 main :: IO ()
-main = putStrLn "No test has been implemented!!!!!!"
+main = putStrLn "No test has been implemented yet"

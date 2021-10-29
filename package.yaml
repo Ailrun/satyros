@@ -60,6 +60,13 @@ tests:
       - satyros
 
       - base
+      - containers
+      - extra
+      - free
+      - lens
+      - mtl
+      - random
+      - vector
     ## Test fields
     main:                           Spec.hs
     # other-modules:

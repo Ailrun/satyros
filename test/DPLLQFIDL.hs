@@ -1,5 +1,5 @@
 {-# LANGUAGE ViewPatterns #-}
-module Satyros.DPLLQFIDL where
+module DPLLQFIDL where
 
 import           Control.Lens                      (_1, _2, each, from, use,
                                                     uses, view, (%~), (&), (.=),
@@ -139,5 +139,5 @@ naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleCheck _ r)) = r
 naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleFind c)) = do
   m <- use (DPLL.theory . _1 . _2)
   DPLL.bcpConflictRelSATHandler $ CNF.Clause (fmap (m Map.!) c)
-  pure (Left (DPLLQFIDLException "Post-BCP conflict handle continuation should not be reachable")) -- construct a conflict clause
+  pure (Left (DPLLQFIDLException "Post-BCP conflict handle continuation should not be reachable"))
 naiveHandler (DPLL.InsideDPLL BellmanFord.NegativeCyclePass) = uses (DPLL.theory . _2) (Right . mapMaybe (\x -> fst x >> negate <$> BellmanFord.toInt (snd (snd x))) . Map.toAscList)
