@@ -1,4 +1,15 @@
-module Satyros.BellmanFord.Storage where
+module Satyros.BellmanFord.Storage
+  ( Storage
+  , IDLGraph
+  , IDLGraphVertex
+  , IDLWeightMap
+  , rootIDLGraphVertex
+  , initializeStorage
+  , storageToValues
+
+  , PositiveInfiniteInt(Finite, PositiveInfinity)
+  , addPositiveInfiniteInt
+  ) where
 
 import           Data.Map      (Map)
 import qualified Data.Map      as Map
