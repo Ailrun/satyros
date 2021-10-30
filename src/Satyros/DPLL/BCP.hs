@@ -7,9 +7,10 @@ module Satyros.DPLL.BCP
 import           Control.Lens             (use, (^?))
 import           Control.Monad.Except     (runExceptT, throwError)
 import           Control.Monad.Extra      (eitherM, forM_)
+import           Control.Monad.Trans      (lift)
 import qualified Satyros.CNF              as CNF
 import           Satyros.DPLL.Assignment  (valueOfLiteral)
-import           Satyros.DPLL.Effect      (DPLL, bcpConflict,
+import           Satyros.DPLL.Effect      (DPLL, bcpComplete, bcpConflict,
                                            bcpConflictDrivenClause,
                                            bcpUnitClause)
 import           Satyros.DPLL.Storage     (assignment, clauses)
@@ -19,7 +20,7 @@ import           Satyros.DPLL.StorageUtil (assignImplicationVariable,
 bcp :: (Functor f) => DPLL s f ()
 bcp = do
   cls <- use clauses
-  eitherM id pure . runExceptT $
+  eitherM id pure . runExceptT $ do
     forM_ cls $ \c@(CNF.Clause ls') -> do
       asgn <- use assignment
       case foldr (go asgn) Nothing ls' of
@@ -28,6 +29,7 @@ bcp = do
         Just (Just l) -> throwError $ do
           bcpUnitClause c l
           bcp
+    lift bcpComplete
   where
     go asgn l rest
       | Just True <- v = Just Nothing

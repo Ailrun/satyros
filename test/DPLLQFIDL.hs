@@ -56,7 +56,7 @@ loop :: DPLL.Storage (QFIDL.ConversionTable, BellmanFord.Storage)
      -> ( Either DPLLQFIDLFailure [Int]
         , DPLL.Storage (QFIDL.ConversionTable, BellmanFord.Storage)
         )
-loop = go (DPLL.bcp >> DPLL.decision >> pure (Left (DPLLQFIDLException "Post decision continuation should not be reachable")))
+loop = go (DPLL.bcp >> pure (Left (DPLLQFIDLException "Post BCP continuation should not be reachable")))
   where
     go d s =
       case DPLL.stepDPLL d s of
@@ -75,9 +75,10 @@ naiveHandler :: DPLLF BellmanFordF
                   BellmanFordF
                   (Either DPLLQFIDLFailure [Int])
 naiveHandler (DPLL.BCPUnitClause c l r) = DPLL.bcpUnitClauseHandler c l >> r
+naiveHandler DPLL.BCPComplete = DPLL.decision >> pure (Left (DPLLQFIDLException "Post decision continuation should not be reachable"))
 naiveHandler (DPLL.BCPConflict c r) = DPLL.bcpConflictRelSATHandler c >> r
 naiveHandler (DPLL.BCPConflictDrivenClause c r) = DPLL.backtrace c >> r
-naiveHandler (DPLL.DecisionResult l) = DPLL.decisionResultHandler l >> DPLL.bcp >> DPLL.decision >> pure (Left (DPLLQFIDLException "Post decision continuation should not be reachable"))
+naiveHandler (DPLL.DecisionResult l) = DPLL.decisionResultHandler l >> DPLL.bcp >> pure (Left (DPLLQFIDLException "Post BCP continuation should not be reachable"))
 naiveHandler DPLL.DecisionComplete = do
   m <- use (DPLL.theory . _1)
   (g, w) <- uses DPLL.assignment $

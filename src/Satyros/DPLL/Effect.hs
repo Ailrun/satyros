@@ -20,6 +20,7 @@ instance (Functor f) => MonadFree (DPLLF f) (DPLL s f) where
   wrap (BCPUnitClause c l r)         = DPLL . wrap $ BCPUnitClause c l $ runDPLL r
   wrap (BCPConflict c r)             = DPLL . wrap $ BCPConflict c $ runDPLL r
   wrap (BCPConflictDrivenClause c r) = DPLL . wrap $ BCPConflictDrivenClause c $ runDPLL r
+  wrap BCPComplete                   = DPLL . wrap $ BCPComplete
   wrap (DecisionResult l)            = DPLL . wrap $ DecisionResult l
   wrap DecisionComplete              = DPLL . wrap $ DecisionComplete
   wrap BacktraceExhaustion           = DPLL . wrap $ BacktraceExhaustion
@@ -46,6 +47,7 @@ data DPLLF f r
   = BCPUnitClause CNF.Clause CNF.Literal r
   | BCPConflict CNF.Clause r
   | BCPConflictDrivenClause CNF.Clause r
+  | BCPComplete
   | DecisionResult CNF.Literal
   | DecisionComplete
   | BacktraceExhaustion
@@ -57,6 +59,7 @@ instance (Show1 f, Functor f) => Show1 (DPLLF f) where
   liftShowsPrec sp _   d (BCPUnitClause c l r) = showsTernaryWith showsPrec showsPrec sp "BCPUnitClause" d c l r
   liftShowsPrec sp _   d (BCPConflict c r) = showsBinaryWith showsPrec sp "BCPConflict" d c r
   liftShowsPrec sp _   d (BCPConflictDrivenClause c r) = showsBinaryWith showsPrec sp "BCPConflictDrivenClause" d c r
+  liftShowsPrec _  _   _ BCPComplete = showString "BCPComplete"
   liftShowsPrec _  _   d (DecisionResult l) = showsUnaryWith showsPrec "DecisionResult" d l
   liftShowsPrec _  _   _ DecisionComplete = showString "DecisionComplete"
   liftShowsPrec _  _   _ BacktraceExhaustion = showString "BacktraceExhaustion"
@@ -75,6 +78,10 @@ bcpConflict c = wrap . BCPConflict c $ pure ()
 bcpConflictDrivenClause :: (Functor f) => CNF.Clause -> DPLL s f ()
 bcpConflictDrivenClause c = wrap . BCPConflictDrivenClause c $ pure ()
 {-# INLINE bcpConflictDrivenClause #-}
+
+bcpComplete :: (Functor f) => DPLL s f ()
+bcpComplete = wrap BCPComplete
+{-# INLINE bcpComplete #-}
 
 decisionResult :: (Functor f) => CNF.Literal -> DPLL s f ()
 decisionResult = wrap . DecisionResult

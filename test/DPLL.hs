@@ -25,7 +25,7 @@ dpll' f stdGen =
     Right s -> loop s & _2 %~ (^. DPLL.stdGen)
 
 loop :: DPLL.Storage s -> (Either DPLLFailure [Bool], DPLL.Storage s)
-loop = go (DPLL.bcp >> pure (Left (DPLLException "Post-BCP continuation should not be reachable")))
+loop = go (DPLL.bcp >> pure (Left (DPLLException "Post BCP continuation should not be reachable")))
   where
     go d s =
       case DPLL.stepDPLL d s of
@@ -43,10 +43,11 @@ initialize f stdGen = first convertFailure $ DPLL.initializeStorage f stdGen ()
 
 naiveHandler :: DPLLF (Const Void) (DPLL s (Const Void) (Either DPLLFailure [Bool])) -> DPLL s (Const Void) (Either DPLLFailure [Bool])
 naiveHandler (DPLL.BCPUnitClause c l r) = DPLL.bcpUnitClauseHandler c l >> r
+naiveHandler DPLL.BCPComplete = DPLL.decision >> pure (Left (DPLLException "Post decision continuation should not be reachable"))
 naiveHandler (DPLL.BCPConflict c r) = DPLL.bcpConflictRelSATHandler c >> r
 naiveHandler (DPLL.BCPConflictDrivenClause c r) = DPLL.backtrace c >> r
-naiveHandler (DPLL.DecisionResult l) = DPLL.decisionResultHandler l >> DPLL.bcp >> pure (Left (DPLLException "Post-BCP continuation should not be reachable"))
+naiveHandler (DPLL.DecisionResult l) = DPLL.decisionResultHandler l >> DPLL.bcp >> pure (Left (DPLLException "Post BCP continuation should not be reachable"))
 naiveHandler DPLL.DecisionComplete = uses DPLL.assignment $ Right . fmap fst . Map.elems . DPLL.getAssignment
 naiveHandler DPLL.BacktraceExhaustion = pure . Left $ DPLLUnsatisfiable "Possibilities are exhausted"
-naiveHandler (DPLL.BacktraceComplete c l) = DPLL.backtraceCompleteHandler c l >> DPLL.decision >> pure (Left (DPLLException "Post-decision continuation should not be reachable"))
+naiveHandler (DPLL.BacktraceComplete c l) = DPLL.backtraceCompleteHandler c l >> DPLL.decision >> pure (Left (DPLLException "Post decision continuation should not be reachable"))
 naiveHandler (DPLL.InsideDPLL (Const x)) = absurd x
