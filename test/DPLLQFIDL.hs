@@ -1,6 +1,6 @@
 module DPLLQFIDL where
 
-import           Control.Lens                      (_1, _2, from, use,
+import           Control.Lens                      (Lens', _1, _2, from, use,
                                                     uses, view, (%~), (&), (.=),
                                                     (^.))
 import           Control.Monad.State.Strict        (runState, state)
@@ -12,7 +12,7 @@ import qualified Data.Map                          as Map
 import           Data.Maybe                        (mapMaybe)
 import           Data.Tuple                        (swap)
 import           Debug.Trace                       (trace)
-import           Satyros.BellmanFord.Effect        (BellmanFordF)
+import           Satyros.BellmanFord.Effect        (BellmanFord, BellmanFordF)
 import qualified Satyros.BellmanFord.Effect        as BellmanFord
 import qualified Satyros.BellmanFord.NegativeCycle as BellmanFord
 import           Satyros.BellmanFord.Propagation   as BellmanFord
@@ -94,7 +94,7 @@ naiveHandler DPLL.DecisionComplete = do
   (g, w) <- uses DPLL.assignment $
     BellmanFord.initializeStore . fmap (QFIDL.fromAssignment m . uncurry CNF.Literal . swap . (_2 %~ view (_1 . from CNF.isPositive))) . Map.toAscList . DPLL.getAssignment
   DPLL.theory . _2 .= w
-  DPLL.DPLL . transFreeT DPLL.InsideDPLL . hoistFreeT (state . (DPLL.theory . _2) . runState) . BellmanFord.runBellmanFord $ BellmanFord.propagation g
+  liftBellmanFord _2 $ BellmanFord.propagation g
   pure (Left (DPLLQFIDLException "Post Bellman-Ford propagation continuation should not be reachable"))
 naiveHandler DPLL.BacktraceExhaustion = pure . Left $ DPLLQFIDLUnsatisfiable "Possibilities are exhausted"
 naiveHandler (DPLL.BacktraceComplete c l) = DPLL.backtraceCompleteHandler c l >> DPLL.decision >> pure (Left (DPLLQFIDLException "Post decision continuation should not be reachable"))
@@ -105,7 +105,7 @@ naiveHandler (DPLL.InsideDPLL BellmanFord.PropagationEnd) = do
   m <- use (DPLL.theory . _1 . _1)
   (g, _) <- uses DPLL.assignment $
     BellmanFord.initializeStore . fmap (QFIDL.fromAssignment m . uncurry CNF.Literal . swap . (_2 %~ view (_1 . from CNF.isPositive))) . Map.toAscList . DPLL.getAssignment
-  DPLL.DPLL . transFreeT DPLL.InsideDPLL . hoistFreeT (state . (DPLL.theory . _2) . runState) . BellmanFord.runBellmanFord $ BellmanFord.negativeCycle g
+  liftBellmanFord _2 $ BellmanFord.negativeCycle g
   pure (Left (DPLLQFIDLException "Post Bellman-Ford negative cycle continuation should not be reachable"))
 naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleCheck _ r)) = r
 naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleFind c)) = do
@@ -113,3 +113,10 @@ naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleFind c)) = do
   DPLL.bcpConflictRelSATHandler $ CNF.Clause (fmap (m Map.!) c)
   pure (Left (DPLLQFIDLException "Post-BCP conflict handle continuation should not be reachable"))
 naiveHandler (DPLL.InsideDPLL BellmanFord.NegativeCyclePass) = uses (DPLL.theory . _2) (Right . mapMaybe (\x -> fst x >> negate <$> BellmanFord.toInt (snd (snd x))) . Map.toAscList)
+
+liftBellmanFord :: Lens' s BellmanFord.Store -> BellmanFord a -> DPLL s BellmanFordF a
+liftBellmanFord l =
+  DPLL.DPLL
+  . transFreeT DPLL.InsideDPLL
+  . hoistFreeT (state . (DPLL.theory . l) . runState)
+  . BellmanFord.runBellmanFord
