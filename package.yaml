@@ -1,6 +1,6 @@
 spec-version:                       0.31.0
 name:                               satyros
-version:                            0.1.0.0
+version:                            0.1.0.1
 synopsis:                           Step-by-step SAT solver for educational purposes
 # description:
 category:                           Language
@@ -29,7 +29,7 @@ library:
   source-dirs:
     - src
   dependencies:
-    - base ^>= 4.14
+    - base >= 4.12 && < 4.15
     - containers
     - extra
     - free
@@ -107,7 +107,6 @@ default-extensions:
   GADTSyntax
   GeneralizedNewtypeDeriving
   HexFloatLiterals
-  ImportQualifiedPost
   InstanceSigs
   KindSignatures
   LambdaCase
@@ -121,13 +120,14 @@ default-extensions:
   RecordWildCards
   ScopedTypeVariables
   StandaloneDeriving
-  StandaloneKindSignatures
   StarIsType
   TupleSections
   TypeApplications
   TypeFamilies
   TypeOperators
   TypeSynonymInstances
+  # ImportQualifiedPost
+  # StandaloneKindSignatures
 # other-extensions:
 ghc-options:
   -Wall -Wcompat -Widentities -Wincomplete-record-updates
