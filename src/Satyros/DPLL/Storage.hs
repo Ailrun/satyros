@@ -1,13 +1,21 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE TemplateHaskell        #-}
+{-# LANGUAGE ViewPatterns           #-}
 module Satyros.DPLL.Storage where
 
-import           Control.Lens            (makeFieldsNoPrefix, set, to, (&),
-                                          (.~), (^.))
+import           Control.Lens            (each, makeFieldsNoPrefix, set, to,
+                                          (&), (.~), (^.), (^..), (^?))
+import           Control.Monad           (forM_, unless, when)
+import           Control.Monad.Except    (throwError)
+import           Data.List               (partition)
+import qualified Data.Map                as Map
 import           Data.Set                (Set)
+import qualified Data.Set                as Set
 import           Data.Vector             (Vector)
+import qualified Data.Vector             as Vector
 import qualified Satyros.CNF             as CNF
-import           Satyros.DPLL.Assignment (Assignment)
+import           Satyros.DPLL.Assignment (Assignment (Assignment),
+                                          valueOfVariable)
 import           System.Random           (RandomGen (..), StdGen)
 
 data Storage s
@@ -39,3 +47,34 @@ instance RandomGen (Storage s) where
   genWord64R u s = flip (set stdGen) s <$> genWord64R u (s ^. stdGen)
 
   genShortByteString n s = flip (set stdGen) s <$> genShortByteString n (s ^. stdGen)
+
+data StorageInitializationFailure
+  = EmptyClause
+  | InitialConflict
+
+initializeStorage :: CNF.Formula -> StdGen -> s -> Either StorageInitializationFailure (Storage s)
+initializeStorage f _stdGen _theory = do
+  unless (null emptyCs) $
+    throwError EmptyClause
+  forM_ initialAssignmentPairs $ \(x, fst -> b) ->
+    when (_assignment ^? valueOfVariable x == Just (not b)) $
+      throwError InitialConflict
+
+  pure Storage{..}
+  where
+    _unassignedVariables = allVariables Set.\\ initiallyAssignedVs
+    _clauses = Vector.fromList nonunitCs
+    _assignment = Assignment $ Map.fromList initialAssignmentPairs
+    _variableLevels = [(Nothing, initiallyAssignedVs)]
+
+    allVariables = Set.fromList $ fmap CNF.Variable [1..mv]
+    CNF.Variable mv = CNF.maxVariableInFormula f
+
+    initiallyAssignedVs = Set.fromList $ fmap fst initialAssignmentPairs
+    initialAssignmentPairs =
+      [(v, (pos ^. CNF.isPositive, Nothing)) | CNF.Literal pos v <- cnfLits]
+    cnfLits = unitCs ^.. each . CNF.literalsOfClause . each
+
+    (unitCs, nonunitCs) = partition CNF.unitClause nonemptyCs
+    (emptyCs, nonemptyCs) = partition CNF.emptyClause cs
+    cs = f ^. CNF.clausesOfFormula

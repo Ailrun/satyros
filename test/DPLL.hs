@@ -1,16 +1,10 @@
-{-# LANGUAGE ViewPatterns #-}
 module DPLL where
 
-import           Control.Lens             (_2, each, uses, (%~), (&), (^.),
-                                           (^..), (^?))
-import           Control.Monad.Except     (throwError)
-import           Control.Monad.Extra      (forM_, when)
+import           Control.Lens             (_2, uses, (%~), (&), (^.))
 import           Control.Monad.Trans.Free (FreeF (Free, Pure))
+import           Data.Bifunctor           (first)
 import           Data.Functor.Const       (Const (Const))
-import           Data.List.Extra          (notNull, partition)
 import qualified Data.Map                 as Map
-import qualified Data.Set                 as Set
-import qualified Data.Vector              as Vector
 import           Data.Void                (Void, absurd)
 import qualified Satyros.CNF              as CNF
 import qualified Satyros.DPLL.Assignment  as DPLL
@@ -46,33 +40,11 @@ loop = go (DPLL.bcp >> pure (Left (DPLLException "Post-BCP continuation should n
 -- |
 -- Initialize DPLL database and resolve trivial error cases / unit clauses.
 initialize :: CNF.Formula -> StdGen -> Either DPLLFailure (DPLL.Storage ())
-initialize f stdGen = do
-  when (notNull emptyCs) $
-    throwError $ DPLLUnsatisfiable "Empty clauses are detected. Is this really intended?"
-  forM_ initialAssignmentPairs $ \(x, not . fst -> b) ->
-    when (_assignment ^? DPLL.valueOfVariable x == Just b) $
-      throwError $ DPLLUnsatisfiable "The initial constraint derives a conflict"
-
-  pure DPLL.Storage{..}
+initialize f stdGen = first convertFailure $ DPLL.initializeStorage f stdGen ()
   where
-    _unassignedVariables = allVariables Set.\\ initiallyAssignedVs
-    _clauses = Vector.fromList nonunitCs
-    _assignment = DPLL.Assignment $ Map.fromList initialAssignmentPairs
-    _variableLevels = [(Nothing, initiallyAssignedVs)]
-    _stdGen = stdGen
-    _theory = ()
-
-    allVariables = Set.fromList $ fmap CNF.Variable [1..mv]
-    CNF.Variable mv = CNF.maxVariableInFormula f
-
-    initiallyAssignedVs = Set.fromList $ fmap fst initialAssignmentPairs
-    initialAssignmentPairs =
-      [(v, (pos ^. CNF.isPositive, Nothing)) | CNF.Literal pos v <- cnfLits]
-    cnfLits = unitCs ^.. each . CNF.literalsOfClause . each
-
-    (unitCs, nonunitCs) = partition CNF.unitClause nonemptyCs
-    (emptyCs, nonemptyCs) = partition CNF.emptyClause cs
-    cs = f ^. CNF.clausesOfFormula
+    convertFailure :: DPLL.StorageInitializationFailure -> DPLLFailure
+    convertFailure DPLL.EmptyClause = DPLLUnsatisfiable "Empty clauses are detected. Is this really intended?"
+    convertFailure DPLL.InitialConflict = DPLLUnsatisfiable "The initial constraint derives a conflict"
 
 naiveHandler :: DPLLF (Const Void) (DPLL s (Const Void) (Either DPLLFailure [Bool])) -> DPLL s (Const Void) (Either DPLLFailure [Bool])
 naiveHandler (DPLL.BCPUnitClause c l r) = DPLL.bcpUnitClauseHandler c l >> r

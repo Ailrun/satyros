@@ -1,16 +1,18 @@
 {-# LANGUAGE ViewPatterns #-}
 module Satyros.BellmanFord.Propagation where
 
-import           Control.Lens                 (_1, at, each, uses, (.=), (^..))
-import           Control.Monad                (forM_, when)
-import qualified Data.Map                     as Map
-import           Data.Maybe                   (fromJust)
-import qualified Data.Set                     as Set
-import           Satyros.BellmanFord.Effect   (BellmanFord, propagationCheck, propagationEnd,
-                                               propagationFindShorter, propagationNth)
-import           Satyros.BellmanFord.IDLGraph (IDLGraph,
-                                               PositiveInfiniteInt (Finite),
-                                               addPositiveInfiniteInt)
+import           Control.Lens               (_1, at, each, uses, (.=), (^..))
+import           Control.Monad              (forM_, when)
+import qualified Data.Map                   as Map
+import           Data.Maybe                 (fromJust)
+import qualified Data.Set                   as Set
+import           Satyros.BellmanFord.Effect (BellmanFord, propagationCheck,
+                                             propagationEnd,
+                                             propagationFindShorter,
+                                             propagationNth)
+import           Satyros.BellmanFord.Store  (IDLGraph,
+                                             PositiveInfiniteInt (Finite),
+                                             addPositiveInfiniteInt)
 
 propagation :: IDLGraph -> BellmanFord ()
 propagation (Map.toList -> graph) = do
