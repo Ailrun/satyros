@@ -35,8 +35,8 @@ initializeStorage es = (Map.fromList $ [((rootIDLGraphVertex, rootIDLGraphVertex
 
 storageToValues :: IDLWeightMap -> [Int]
 storageToValues m
-  | Just QFIDL.ZeroVariable `Map.member` m = vs
-  | otherwise = map (subtract $ head vs) (tail vs)
+  | Just QFIDL.ZeroVariable `Map.member` m = map (subtract $ head vs) (tail vs)
+  | otherwise = vs
   where
     vs = mapMaybe (\x -> fst x >> negate <$> toInt (snd (snd x))) . Map.toAscList $ m
 
