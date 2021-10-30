@@ -8,7 +8,6 @@ import           Control.Monad.Trans.Free   (FreeF (Free, Pure), hoistFreeT,
 import           Data.Bifunctor             (first)
 import           Data.Coerce                (coerce)
 import qualified Data.Map                   as Map
-import           Data.Maybe                 (mapMaybe)
 import           Data.Tuple                 (swap)
 import           Debug.Trace                (trace)
 import           Satyros.BellmanFord        (BellmanFord, BellmanFordF)
@@ -103,7 +102,7 @@ naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleFind c)) = do
   m <- use (DPLL.theory . _1 . _2)
   DPLL.bcpConflictRelSATHandler $ CNF.Clause (fmap (m Map.!) c)
   pure (Left (DPLLQFIDLException "Post-BCP conflict handle continuation should not be reachable"))
-naiveHandler (DPLL.InsideDPLL BellmanFord.NegativeCyclePass) = uses (DPLL.theory . _2) (Right . mapMaybe (\x -> fst x >> negate <$> BellmanFord.toInt (snd (snd x))) . Map.toAscList)
+naiveHandler (DPLL.InsideDPLL BellmanFord.NegativeCyclePass) = uses (DPLL.theory . _2) (Right . BellmanFord.storeToValues)
 
 liftBellmanFord :: Lens' s BellmanFord.Store -> BellmanFord a -> DPLL s BellmanFordF a
 liftBellmanFord l =

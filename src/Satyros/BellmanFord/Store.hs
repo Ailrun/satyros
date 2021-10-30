@@ -21,6 +21,13 @@ initializeStore es = (Map.fromList $ [((rootIDLGraphVertex, rootIDLGraphVertex),
 
     edges = (\(QFIDL.LessThanEqualTo x1 x2 v) -> ((Just x1, Just x2), v)) <$> es
 
+storeToValues :: IDLWeightMap -> [Int]
+storeToValues m
+  | Just QFIDL.ZeroVariable `Map.member` m = vs
+  | otherwise = map (subtract $ head vs) (tail vs)
+  where
+    vs = mapMaybe (\x -> fst x >> negate <$> toInt (snd (snd x))) . Map.toAscList $ m
+
 data PositiveInfiniteInt
   = Finite Int
   | PositiveInfinity
