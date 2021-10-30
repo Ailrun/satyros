@@ -43,7 +43,7 @@ dpllqfidl f stdGen =
 
 -- |
 -- Initialize DPLL database and resolve trivial error cases / unit clauses.
-initialize :: CNF.FormulaLike QFIDL.Expressible -> StdGen -> Either DPLLQFIDLFailure (DPLL.Storage (QFIDL.ConversionTable, BellmanFord.Store))
+initialize :: CNF.FormulaLike QFIDL.Expressible -> StdGen -> Either DPLLQFIDLFailure (DPLL.Storage (QFIDL.ConversionTable, BellmanFord.Storage))
 initialize f stdGen = first convertFailure $ DPLL.initializeStorage cnf stdGen (mapping, Map.empty)
   where
     convertFailure :: DPLL.StorageInitializationFailure -> DPLLQFIDLFailure
@@ -52,9 +52,9 @@ initialize f stdGen = first convertFailure $ DPLL.initializeStorage cnf stdGen (
 
     (cnf, mapping) = QFIDL.toCNF f
 
-loop :: DPLL.Storage (QFIDL.ConversionTable, BellmanFord.Store)
+loop :: DPLL.Storage (QFIDL.ConversionTable, BellmanFord.Storage)
      -> ( Either DPLLQFIDLFailure [Int]
-        , DPLL.Storage (QFIDL.ConversionTable, BellmanFord.Store)
+        , DPLL.Storage (QFIDL.ConversionTable, BellmanFord.Storage)
         )
 loop = go (DPLL.bcp >> DPLL.decision >> pure (Left (DPLLQFIDLException "Post decision continuation should not be reachable")))
   where
@@ -67,11 +67,11 @@ loop = go (DPLL.bcp >> DPLL.decision >> pure (Left (DPLLQFIDLException "Post dec
 
 naiveHandler :: DPLLF BellmanFordF
                   (DPLL
-                    (QFIDL.ConversionTable, BellmanFord.Store)
+                    (QFIDL.ConversionTable, BellmanFord.Storage)
                     BellmanFordF
                     (Either DPLLQFIDLFailure [Int]))
              -> DPLL
-                  (QFIDL.ConversionTable, BellmanFord.Store)
+                  (QFIDL.ConversionTable, BellmanFord.Storage)
                   BellmanFordF
                   (Either DPLLQFIDLFailure [Int])
 naiveHandler (DPLL.BCPUnitClause c l r) = DPLL.bcpUnitClauseHandler c l >> r
@@ -81,7 +81,7 @@ naiveHandler (DPLL.DecisionResult l) = DPLL.decisionResultHandler l >> DPLL.bcp 
 naiveHandler DPLL.DecisionComplete = do
   m <- use (DPLL.theory . _1 . _1)
   (g, w) <- uses DPLL.assignment $
-    BellmanFord.initializeStore . QFIDL.fromAssignment m . fmap (_2 %~ view _1) . Map.toAscList . DPLL.getAssignment
+    BellmanFord.initializeStorage . QFIDL.fromAssignment m . fmap (_2 %~ view _1) . Map.toAscList . DPLL.getAssignment
   DPLL.theory . _2 .= w
   liftBellmanFord _2 $ BellmanFord.propagation g
   pure (Left (DPLLQFIDLException "Post Bellman-Ford propagation continuation should not be reachable"))
@@ -93,7 +93,7 @@ naiveHandler (DPLL.InsideDPLL (BellmanFord.PropagationNth _ r)) = r
 naiveHandler (DPLL.InsideDPLL BellmanFord.PropagationEnd) = do
   m <- use (DPLL.theory . _1 . _1)
   (g, _) <- uses DPLL.assignment $
-    BellmanFord.initializeStore . QFIDL.fromAssignment m . fmap (_2 %~ view _1) . Map.toAscList . DPLL.getAssignment
+    BellmanFord.initializeStorage . QFIDL.fromAssignment m . fmap (_2 %~ view _1) . Map.toAscList . DPLL.getAssignment
   liftBellmanFord _2 $ BellmanFord.negativeCycle g
   pure (Left (DPLLQFIDLException "Post Bellman-Ford negative cycle continuation should not be reachable"))
 naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleCheck _ r)) = r
@@ -101,9 +101,9 @@ naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleFind c)) = do
   m <- use (DPLL.theory . _1 . _2)
   DPLL.bcpConflictRelSATHandler $ CNF.Clause (fmap (m Map.!) c)
   pure (Left (DPLLQFIDLException "Post-BCP conflict handle continuation should not be reachable"))
-naiveHandler (DPLL.InsideDPLL BellmanFord.NegativeCyclePass) = uses (DPLL.theory . _2) (Right . BellmanFord.storeToValues)
+naiveHandler (DPLL.InsideDPLL BellmanFord.NegativeCyclePass) = uses (DPLL.theory . _2) (Right . BellmanFord.storageToValues)
 
-liftBellmanFord :: Lens' s BellmanFord.Store -> BellmanFord a -> DPLL s BellmanFordF a
+liftBellmanFord :: Lens' s BellmanFord.Storage -> BellmanFord a -> DPLL s BellmanFordF a
 liftBellmanFord l =
   DPLL.DPLL
   . transFreeT DPLL.InsideDPLL

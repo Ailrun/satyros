@@ -1,20 +1,20 @@
 module Satyros.BellmanFord.Effect where
 
-import           Control.Monad.State.Strict (MonadState, State, runState)
-import           Control.Monad.Trans.Free   (FreeF, FreeT (runFreeT),
-                                             MonadFree (wrap), hoistFreeT)
-import           Data.Bifunctor             (first)
-import           Data.Functor.Classes       (Show1 (liftShowsPrec),
-                                             showsBinaryWith, showsPrec1,
-                                             showsUnaryWith)
-import           Data.Functor.Const         (Const (Const))
-import           Satyros.BellmanFord.Store  (IDLGraphVertex,
-                                             PositiveInfiniteInt, Store)
-import qualified Satyros.QFIDL              as QFIDL
-import           Satyros.Util               (showsTernaryWith)
+import           Control.Monad.State.Strict  (MonadState, State, runState)
+import           Control.Monad.Trans.Free    (FreeF, FreeT (runFreeT),
+                                              MonadFree (wrap), hoistFreeT)
+import           Data.Bifunctor              (first)
+import           Data.Functor.Classes        (Show1 (liftShowsPrec),
+                                              showsBinaryWith, showsPrec1,
+                                              showsUnaryWith)
+import           Data.Functor.Const          (Const (Const))
+import           Satyros.BellmanFord.Storage (IDLGraphVertex,
+                                              PositiveInfiniteInt, Storage)
+import qualified Satyros.QFIDL               as QFIDL
+import           Satyros.Util                (showsTernaryWith)
 
-newtype BellmanFord a = BellmanFord{ runBellmanFord :: FreeT BellmanFordF (State Store) a }
-  deriving newtype (Functor, Applicative, Monad, MonadFree BellmanFordF, MonadState Store)
+newtype BellmanFord a = BellmanFord{ runBellmanFord :: FreeT BellmanFordF (State Storage) a }
+  deriving newtype (Functor, Applicative, Monad, MonadFree BellmanFordF, MonadState Storage)
 
 instance Show1 BellmanFord where
   liftShowsPrec sp slp d =
@@ -25,7 +25,7 @@ instance Show1 BellmanFord where
 instance (Show a) => Show (BellmanFord a) where
   showsPrec = showsPrec1
 
-stepBellmanFord :: BellmanFord a -> Store -> (FreeF BellmanFordF a (BellmanFord a), Store)
+stepBellmanFord :: BellmanFord a -> Storage -> (FreeF BellmanFordF a (BellmanFord a), Storage)
 stepBellmanFord d s = first (fmap BellmanFord) $ runState (runFreeT (runBellmanFord d)) s
 {-# INLINE stepBellmanFord #-}
 

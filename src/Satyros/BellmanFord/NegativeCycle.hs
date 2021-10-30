@@ -1,16 +1,16 @@
 module Satyros.BellmanFord.NegativeCycle where
 
-import           Control.Lens               (at, uses)
-import           Control.Monad              (forM_, when)
-import qualified Data.Map                   as Map
-import           Data.Maybe                 (fromJust)
-import           Satyros.BellmanFord.Effect (BellmanFord, negativeCycleCheck,
-                                             negativeCycleFind,
-                                             negativeCyclePass)
-import           Satyros.BellmanFord.Store  (IDLGraph,
-                                             PositiveInfiniteInt (Finite),
-                                             addPositiveInfiniteInt)
-import qualified Satyros.QFIDL              as QFIDL
+import           Control.Lens                (at, uses)
+import           Control.Monad               (forM_, when)
+import qualified Data.Map                    as Map
+import           Data.Maybe                  (fromJust)
+import           Satyros.BellmanFord.Effect  (BellmanFord, negativeCycleCheck,
+                                              negativeCycleFind,
+                                              negativeCyclePass)
+import           Satyros.BellmanFord.Storage (IDLGraph,
+                                              PositiveInfiniteInt (Finite),
+                                              addPositiveInfiniteInt)
+import qualified Satyros.QFIDL               as QFIDL
 
 negativeCycle :: IDLGraph -> BellmanFord ()
 negativeCycle graph = do
