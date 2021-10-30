@@ -16,7 +16,7 @@ import           Data.Tuple                (swap)
 import qualified Satyros.CNF               as CNF
 import           Satyros.QFIDL.Expressed   (Expressed (..))
 import           Satyros.QFIDL.Expressible (Expressible (..), Operator (..))
-import           Satyros.QFIDL.Variable    (Variable (Variable))
+import           Satyros.QFIDL.Variable    (Variable (ZeroVariable))
 
 type ConversionTable = (Map CNF.Variable Expressed, Map Expressed CNF.Literal)
 
@@ -54,7 +54,7 @@ transformClauseLike = coerce go
     go = getAp . mconcat . fmap (Ap . transformExpressible)
 
 transformExpressible :: Expressible -> [[Expressed]]
-transformExpressible (Singleton v op n)           = transformExpressible (Difference v (Variable 0) op n)
+transformExpressible (Singleton v op n)           = transformExpressible (Difference v ZeroVariable op n)
 transformExpressible (Difference v1 v2 (::<?) x)  = [[LessThanEqualTo v1 v2 (ceiling (x - 1))]]
 transformExpressible (Difference v1 v2 (::<=?) x) = [[LessThanEqualTo v1 v2 (floor x)]]
 transformExpressible (Difference v1 v2 (::>?) x)  = transformExpressible (Difference v2 v1 (::<?) (- x))
