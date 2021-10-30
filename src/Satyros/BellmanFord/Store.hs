@@ -2,6 +2,7 @@ module Satyros.BellmanFord.Store where
 
 import           Data.Map      (Map)
 import qualified Data.Map      as Map
+import           Data.Maybe    (mapMaybe)
 import qualified Data.Set      as Set
 import qualified Satyros.QFIDL as QFIDL
 

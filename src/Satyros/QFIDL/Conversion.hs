@@ -6,7 +6,7 @@ module Satyros.QFIDL.Conversion
   ) where
 
 import           Control.Applicative       (liftA2)
-import           Control.Lens              (_1, at, over, view, (&), (?~), (^.))
+import           Control.Lens              (_1, at, over, view, (&), (?~))
 import           Data.Coerce               (coerce)
 import           Data.List                 (mapAccumL)
 import           Data.Map                  (Map)
@@ -39,10 +39,13 @@ toCNF = coerce $ swap . toCNF'
       | newV:newVs' <- newVs       = (((v2e & at newV ?~ e , e2l & at e ?~ CNF.Literal CNF.Positive newV & at (negateExpressed e) ?~ CNF.Literal CNF.Negative newV), newVs'), CNF.Literal CNF.Positive newV)
       | otherwise                  = error "toCNF: impossible case!"
 
-fromAssignment :: Map CNF.Variable Expressed -> CNF.Literal -> Expressed
-fromAssignment m (CNF.Literal p ((m Map.!) -> e))
-  | p ^. CNF.isPositive = e
-  | otherwise           = negateExpressed e
+fromAssignment :: Map CNF.Variable Expressed -> [(CNF.Variable, Bool)] -> [Expressed]
+fromAssignment m = fmap (fromVariable m)
+
+fromVariable :: Map CNF.Variable Expressed -> (CNF.Variable, Bool) -> Expressed
+fromVariable m ((m Map.!) -> e, v)
+  | v         = e
+  | otherwise = negateExpressed e
 
 negateExpressed :: Expressed -> Expressed
 negateExpressed (LessThanEqualTo v1 v2 n) = LessThanEqualTo v2 v1 (- n - 1)

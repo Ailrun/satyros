@@ -1,14 +1,13 @@
 module DPLLQFIDL where
 
-import           Control.Lens               (Lens', _1, _2, from, use, uses,
-                                             view, (%~), (&), (.=), (^.))
+import           Control.Lens               (Lens', _1, _2, use, uses, view,
+                                             (%~), (&), (.=), (^.))
 import           Control.Monad.State.Strict (runState, state)
 import           Control.Monad.Trans.Free   (FreeF (Free, Pure), hoistFreeT,
                                              transFreeT)
 import           Data.Bifunctor             (first)
 import           Data.Coerce                (coerce)
 import qualified Data.Map                   as Map
-import           Data.Tuple                 (swap)
 import           Debug.Trace                (trace)
 import           Satyros.BellmanFord        (BellmanFord, BellmanFordF)
 import qualified Satyros.BellmanFord        as BellmanFord
@@ -82,7 +81,7 @@ naiveHandler (DPLL.DecisionResult l) = DPLL.decisionResultHandler l >> DPLL.bcp 
 naiveHandler DPLL.DecisionComplete = do
   m <- use (DPLL.theory . _1 . _1)
   (g, w) <- uses DPLL.assignment $
-    BellmanFord.initializeStore . fmap (QFIDL.fromAssignment m . uncurry CNF.Literal . swap . (_2 %~ view (_1 . from CNF.isPositive))) . Map.toAscList . DPLL.getAssignment
+    BellmanFord.initializeStore . QFIDL.fromAssignment m . fmap (_2 %~ view _1) . Map.toAscList . DPLL.getAssignment
   DPLL.theory . _2 .= w
   liftBellmanFord _2 $ BellmanFord.propagation g
   pure (Left (DPLLQFIDLException "Post Bellman-Ford propagation continuation should not be reachable"))
@@ -94,7 +93,7 @@ naiveHandler (DPLL.InsideDPLL (BellmanFord.PropagationNth _ r)) = r
 naiveHandler (DPLL.InsideDPLL BellmanFord.PropagationEnd) = do
   m <- use (DPLL.theory . _1 . _1)
   (g, _) <- uses DPLL.assignment $
-    BellmanFord.initializeStore . fmap (QFIDL.fromAssignment m . uncurry CNF.Literal . swap . (_2 %~ view (_1 . from CNF.isPositive))) . Map.toAscList . DPLL.getAssignment
+    BellmanFord.initializeStore . QFIDL.fromAssignment m . fmap (_2 %~ view _1) . Map.toAscList . DPLL.getAssignment
   liftBellmanFord _2 $ BellmanFord.negativeCycle g
   pure (Left (DPLLQFIDLException "Post Bellman-Ford negative cycle continuation should not be reachable"))
 naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleCheck _ r)) = r
