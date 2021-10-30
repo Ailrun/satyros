@@ -1,32 +1,23 @@
 module DPLLQFIDL where
 
-import           Control.Lens                      (Lens', _1, _2, from, use,
-                                                    uses, view, (%~), (&), (.=),
-                                                    (^.))
-import           Control.Monad.State.Strict        (runState, state)
-import           Control.Monad.Trans.Free          (FreeF (Free, Pure),
-                                                    hoistFreeT, transFreeT)
-import           Data.Bifunctor                    (first)
-import           Data.Coerce                       (coerce)
-import qualified Data.Map                          as Map
-import           Data.Maybe                        (mapMaybe)
-import           Data.Tuple                        (swap)
-import           Debug.Trace                       (trace)
-import           Satyros.BellmanFord.Effect        (BellmanFord, BellmanFordF)
-import qualified Satyros.BellmanFord.Effect        as BellmanFord
-import qualified Satyros.BellmanFord.NegativeCycle as BellmanFord
-import           Satyros.BellmanFord.Propagation   as BellmanFord
-import qualified Satyros.BellmanFord.Store         as BellmanFord
-import qualified Satyros.CNF                       as CNF
-import qualified Satyros.DPLL.Assignment           as DPLL
-import qualified Satyros.DPLL.BCP                  as DPLL
-import qualified Satyros.DPLL.Backtrace            as DPLL
-import qualified Satyros.DPLL.Decision             as DPLL
-import           Satyros.DPLL.Effect               (DPLL, DPLLF)
-import qualified Satyros.DPLL.Effect               as DPLL
-import qualified Satyros.DPLL.Storage              as DPLL
-import qualified Satyros.QFIDL                     as QFIDL
-import           System.Random                     (StdGen, mkStdGen)
+import           Control.Lens               (Lens', _1, _2, from, use, uses,
+                                             view, (%~), (&), (.=), (^.))
+import           Control.Monad.State.Strict (runState, state)
+import           Control.Monad.Trans.Free   (FreeF (Free, Pure), hoistFreeT,
+                                             transFreeT)
+import           Data.Bifunctor             (first)
+import           Data.Coerce                (coerce)
+import qualified Data.Map                   as Map
+import           Data.Maybe                 (mapMaybe)
+import           Data.Tuple                 (swap)
+import           Debug.Trace                (trace)
+import           Satyros.BellmanFord        (BellmanFord, BellmanFordF)
+import qualified Satyros.BellmanFord        as BellmanFord
+import qualified Satyros.CNF                as CNF
+import           Satyros.DPLL               (DPLL, DPLLF)
+import qualified Satyros.DPLL               as DPLL
+import qualified Satyros.QFIDL              as QFIDL
+import           System.Random              (StdGen, mkStdGen)
 
 data DPLLQFIDLFailure
   = DPLLQFIDLException String

@@ -7,13 +7,8 @@ import           Data.Functor.Const       (Const (Const))
 import qualified Data.Map                 as Map
 import           Data.Void                (Void, absurd)
 import qualified Satyros.CNF              as CNF
-import qualified Satyros.DPLL.Assignment  as DPLL
-import qualified Satyros.DPLL.BCP         as DPLL
-import qualified Satyros.DPLL.Backtrace   as DPLL
-import qualified Satyros.DPLL.Decision    as DPLL
-import           Satyros.DPLL.Effect      (DPLL, DPLLF)
-import qualified Satyros.DPLL.Effect      as DPLL
-import qualified Satyros.DPLL.Storage     as DPLL
+import           Satyros.DPLL             (DPLL, DPLLF)
+import qualified Satyros.DPLL             as DPLL
 import           System.Random.Stateful   (StdGen, getStdRandom)
 
 data DPLLFailure
