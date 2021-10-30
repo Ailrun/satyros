@@ -79,7 +79,7 @@ naiveHandler (DPLL.BCPConflict c r) = DPLL.bcpConflictRelSATHandler c >> r
 naiveHandler (DPLL.BCPConflictDrivenClause c r) = DPLL.backtrace c >> r
 naiveHandler (DPLL.DecisionResult l) = DPLL.decisionResultHandler l >> DPLL.bcp >> DPLL.decision >> pure (Left (DPLLQFIDLException "Post decision continuation should not be reachable"))
 naiveHandler DPLL.DecisionComplete = do
-  m <- use (DPLL.theory . _1 . _1)
+  m <- use (DPLL.theory . _1)
   (g, w) <- uses DPLL.assignment $
     BellmanFord.initializeStorage . QFIDL.fromAssignment m . fmap (_2 %~ view _1) . Map.toAscList . DPLL.getAssignment
   DPLL.theory . _2 .= w
@@ -91,7 +91,7 @@ naiveHandler (DPLL.InsideDPLL (BellmanFord.PropagationCheck _ r)) = r
 naiveHandler (DPLL.InsideDPLL (BellmanFord.PropagationFindShorter _ _ r)) = r
 naiveHandler (DPLL.InsideDPLL (BellmanFord.PropagationNth _ r)) = r
 naiveHandler (DPLL.InsideDPLL BellmanFord.PropagationEnd) = do
-  m <- use (DPLL.theory . _1 . _1)
+  m <- use (DPLL.theory . _1)
   (g, _) <- uses DPLL.assignment $
     BellmanFord.initializeStorage . QFIDL.fromAssignment m . fmap (_2 %~ view _1) . Map.toAscList . DPLL.getAssignment
   liftBellmanFord _2 $ BellmanFord.negativeCycle g

@@ -39,11 +39,11 @@ toCNF = coerce $ swap . toCNF'
       | newV:newVs' <- newVs       = (((v2e & at newV ?~ e , e2l & at e ?~ CNF.Literal CNF.Positive newV & at (negateExpressed e) ?~ CNF.Literal CNF.Negative newV), newVs'), CNF.Literal CNF.Positive newV)
       | otherwise                  = error "toCNF: impossible case!"
 
-fromAssignment :: Map CNF.Variable Expressed -> [(CNF.Variable, Bool)] -> [Expressed]
-fromAssignment m = fmap (fromVariable m)
+fromAssignment :: ConversionTable -> [(CNF.Variable, Bool)] -> [Expressed]
+fromAssignment = fmap . fromVariable
 
-fromVariable :: Map CNF.Variable Expressed -> (CNF.Variable, Bool) -> Expressed
-fromVariable m ((m Map.!) -> e, v)
+fromVariable :: ConversionTable -> (CNF.Variable, Bool) -> Expressed
+fromVariable (m, _) ((m Map.!) -> e, v)
   | v         = e
   | otherwise = negateExpressed e
 
