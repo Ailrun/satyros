@@ -19,7 +19,11 @@ source-repository head
 
 library
   exposed-modules:    Satyros.UI
-  other-modules:      Paths_satyros_ui_haskell
+  other-modules:
+    Paths_satyros_ui_haskell
+    Satyros.Handler.Naive
+    Satyros.UI.Util
+
   hs-source-dirs:     src
   default-extensions:
     BangPatterns
@@ -66,9 +70,9 @@ library
 
   ghc-options:
     -Wall -Wcompat -Widentities -Wincomplete-record-updates
-    -Wincomplete-uni-patterns -Wmissing-deriving-strategies
-    -Wmissing-home-modules -Wmonomorphism-restriction -Wpartial-fields
-    -Wredundant-constraints -Wunused-packages -Wunused-type-patterns
+    -Wincomplete-uni-patterns -Wmissing-home-modules
+    -Wmonomorphism-restriction -Wpartial-fields -Wredundant-constraints
+    -Wunused-type-patterns
 
   build-depends:
     , base        >=4.12    && <4.15
@@ -79,7 +83,7 @@ library
     , lens
     , mtl
     , random
-    , satyros     ^>=0.1.0.1
+    , satyros     ^>=0.2.2.0
     , vector
 
   default-language:   Haskell2010
@@ -132,9 +136,9 @@ executable satyros-ui
 
   ghc-options:
     -Wall -Wcompat -Widentities -Wincomplete-record-updates
-    -Wincomplete-uni-patterns -Wmissing-deriving-strategies
-    -Wmissing-home-modules -Wmonomorphism-restriction -Wpartial-fields
-    -Wredundant-constraints -Wunused-packages -Wunused-type-patterns
+    -Wincomplete-uni-patterns -Wmissing-home-modules
+    -Wmonomorphism-restriction -Wpartial-fields -Wredundant-constraints
+    -Wunused-type-patterns
 
   build-depends:
     , base                >=4.12 && <4.15
@@ -144,4 +148,4 @@ executable satyros-ui
   default-language:   Haskell2010
 
   if impl(ghcjs)
-    cpp-options: -DGHCJS
+    build-depends: ghcjs-base
