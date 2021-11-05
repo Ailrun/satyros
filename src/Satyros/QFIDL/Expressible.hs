@@ -15,4 +15,4 @@ data Operator
   | (::>=?)
   | (::=?)
   | (::<>?)
-  deriving stock (Generic, Eq, Show)
+  deriving stock (Generic, Eq, Show, Read)
