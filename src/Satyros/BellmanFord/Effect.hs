@@ -8,12 +8,14 @@ import           Data.Functor.Classes        (Show1 (liftShowsPrec),
                                               showsBinaryWith, showsPrec1,
                                               showsUnaryWith)
 import           Data.Functor.Const          (Const (Const))
+import           GHC.Generics                (Generic, Generic1)
 import           Satyros.BellmanFord.Storage (IDLGraphVertex,
                                               PositiveInfiniteInt, Storage)
 import qualified Satyros.QFIDL               as QFIDL
 import           Satyros.Util                (showsTernaryWith)
 
 newtype BellmanFord a = BellmanFord{ runBellmanFord :: FreeT BellmanFordF (State Storage) a }
+  deriving stock (Generic, Generic1)
   deriving newtype (Functor, Applicative, Monad, MonadFree BellmanFordF, MonadState Storage)
 
 instance Show1 BellmanFord where
@@ -37,7 +39,7 @@ data BellmanFordF r
   | NegativeCycleCheck (IDLGraphVertex, IDLGraphVertex) r
   | NegativeCycleFind [QFIDL.Expressed]
   | NegativeCyclePass
-  deriving stock (Show, Functor)
+  deriving stock (Generic, Generic1, Show, Functor)
 
 instance Show1 BellmanFordF where
   liftShowsPrec sp _ d (PropagationCheck vs r) = showsBinaryWith showsPrec sp "PropagationCheck" d vs r

@@ -15,6 +15,7 @@ import           Data.Map      (Map)
 import qualified Data.Map      as Map
 import           Data.Maybe    (mapMaybe)
 import qualified Data.Set      as Set
+import           GHC.Generics  (Generic)
 import qualified Satyros.QFIDL as QFIDL
 
 type Storage = IDLWeightMap
@@ -43,7 +44,7 @@ storageToValues m
 data PositiveInfiniteInt
   = Finite Int
   | PositiveInfinity
-  deriving stock (Eq, Ord, Show)
+  deriving stock (Generic, Eq, Ord, Show)
 
 addPositiveInfiniteInt :: PositiveInfiniteInt -> PositiveInfiniteInt -> PositiveInfiniteInt
 addPositiveInfiniteInt (Finite n)       (Finite m)       = Finite (n + m)

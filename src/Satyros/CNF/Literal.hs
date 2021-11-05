@@ -8,13 +8,14 @@ module Satyros.CNF.Literal
   ) where
 
 import           Control.Lens           ((#))
+import           GHC.Generics           (Generic)
 import           Satyros.CNF.Positivity (Positivity (Negative, Positive),
                                          isPositive)
 import           Satyros.CNF.Variable   (Variable (Variable))
 import           Satyros.Util           (intToWord, wordToInt)
 
 newtype Literal = LiteralInternal Int
-  deriving stock (Eq, Ord)
+  deriving stock (Generic, Eq, Ord)
   deriving newtype (Show)
 
 pattern Literal :: Positivity -> Variable -> Literal

@@ -9,11 +9,13 @@ import           Data.Functor.Classes       (Show1 (liftShowsPrec),
                                              showsBinaryWith, showsPrec1,
                                              showsUnaryWith)
 import           Data.Functor.Const         (Const (Const))
+import           GHC.Generics               (Generic, Generic1)
 import qualified Satyros.CNF                as CNF
 import           Satyros.DPLL.Storage       (Storage)
 import           Satyros.Util               (showsTernaryWith)
 
 newtype DPLL s f a = DPLL{ runDPLL :: FreeT (DPLLF f) (State (Storage s)) a }
+  deriving stock (Generic, Generic1)
   deriving newtype (Functor, Applicative, Monad, MonadState (Storage s))
 
 instance (Functor f) => MonadFree (DPLLF f) (DPLL s f) where
@@ -53,7 +55,7 @@ data DPLLF f r
   | BacktraceExhaustion
   | BacktraceComplete CNF.Clause CNF.Literal
   | InsideDPLL (f r)
-  deriving stock (Show, Functor)
+  deriving stock (Generic, Generic1, Show, Functor)
 
 instance (Show1 f, Functor f) => Show1 (DPLLF f) where
   liftShowsPrec sp _   d (BCPUnitClause c l r) = showsTernaryWith showsPrec showsPrec sp "BCPUnitClause" d c l r

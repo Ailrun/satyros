@@ -7,9 +7,11 @@ import           Data.Bool    (bool)
 import           Data.Map     (Map)
 import qualified Data.Map     as Map
 import           Data.Set     (Set)
+import           GHC.Generics (Generic)
 import qualified Satyros.CNF  as CNF
 
 newtype Assignment = Assignment { getAssignment :: Map CNF.Variable (Bool, Maybe CNF.Clause) }
+  deriving stock (Generic)
   deriving newtype (Show)
 
 instance Wrapped Assignment where

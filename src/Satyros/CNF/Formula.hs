@@ -9,11 +9,13 @@ module Satyros.CNF.Formula
   ) where
 
 import           Control.Lens         (Iso', _Wrapped, makeWrapped)
+import           GHC.Generics         (Generic, Generic1)
 import           Satyros.CNF.Clause   (Clause, ClauseLike, maxVariableInClause)
 import           Satyros.CNF.Literal  (Literal)
 import           Satyros.CNF.Variable (Variable)
 
 newtype FormulaLike a = FormulaLike { _clausesOfFormula :: [ClauseLike a] }
+  deriving stock (Generic, Generic1)
   deriving newtype (Show, Semigroup, Monoid)
 
 makeWrapped ''FormulaLike

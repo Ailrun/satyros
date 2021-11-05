@@ -13,6 +13,7 @@ import           Data.Set                (Set)
 import qualified Data.Set                as Set
 import           Data.Vector             (Vector)
 import qualified Data.Vector             as Vector
+import           GHC.Generics            (Generic, Generic1)
 import qualified Satyros.CNF             as CNF
 import           Satyros.DPLL.Assignment (Assignment (Assignment),
                                           valueOfVariable)
@@ -27,7 +28,7 @@ data Storage s
     , _stdGen              :: StdGen
     , _theory              :: s
     }
-  deriving stock (Show)
+  deriving stock (Generic, Generic1, Show)
 
 makeFieldsNoPrefix ''Storage
 

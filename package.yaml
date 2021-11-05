@@ -1,8 +1,10 @@
 spec-version:                       0.31.0
 name:                               satyros
-version:                            0.2.0.0
+version:                            0.2.1.0
 synopsis:                           Step-by-step SAT solver for educational purposes
-# description:
+description: |
+  Satyros is a step-by-step SAT solver for educational purposes,
+  based on free monad and its interpretation.
 category:                           Language
 homepage:                           https://github.com/Ailrun/satyros#readme
 bug-reports:                        https://github.com/Ailrun/satyros/issues

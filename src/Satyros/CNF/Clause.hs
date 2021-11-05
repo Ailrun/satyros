@@ -11,10 +11,12 @@ module Satyros.CNF.Clause
   ) where
 
 import           Control.Lens         (Iso', _Wrapped, makeWrapped)
+import           GHC.Generics         (Generic, Generic1)
 import           Satyros.CNF.Literal  (Literal, literalToVariable)
 import           Satyros.CNF.Variable (Variable)
 
 newtype ClauseLike a = ClauseLike { _literalsOfClause :: [a] }
+  deriving stock (Generic, Generic1)
   deriving newtype (Show, Semigroup, Monoid)
 
 makeWrapped ''ClauseLike

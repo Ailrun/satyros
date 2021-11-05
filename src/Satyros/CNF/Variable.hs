@@ -3,8 +3,10 @@ module Satyros.CNF.Variable
   ( Variable(Variable)
   ) where
 
+import           GHC.Generics (Generic)
+
 newtype Variable = VariableInternal Word
-  deriving stock (Eq, Ord)
+  deriving stock (Generic, Eq, Ord)
   deriving newtype (Show)
 
 pattern Variable :: Word -> Variable

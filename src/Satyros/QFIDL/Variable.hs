@@ -3,8 +3,10 @@ module Satyros.QFIDL.Variable
   ( Variable(ZeroVariable, Variable)
   ) where
 
+import           GHC.Generics (Generic)
+
 newtype Variable = VariableInternal Word
-  deriving stock (Eq, Ord)
+  deriving stock (Generic, Eq, Ord)
   deriving newtype (Show)
 
 pattern ZeroVariable :: Variable
