@@ -1,9 +1,9 @@
 {-# LANGUAGE CPP #-}
 module Main where
 
+#ifdef __GHCJS__
 import           Language.Javascript.JSaddle (JSVal)
 import           Satyros.UI
-#ifdef __GHCJS__
 import           GHCJS.Foreign.Callback
 #endif
 
@@ -12,8 +12,7 @@ main = do
 #ifndef __GHCJS__
   pure ()
 #else
-  s <- makeSatyrosInterface
-  syncCallback1' s >>= setSatyrosInterface
+  (makeSatyrosAPI >>= syncCallback1') >>= setSatyrosAPI
 
-foreign import javascript unsafe "window.satyrosInterface = $1" setSatyrosInterface :: Callback (JSVal -> IO JSVal) -> IO ()
+foreign import javascript unsafe "window.makeSatyrosAPI = $1" setSatyrosAPI :: Callback (JSVal -> IO JSVal) -> IO ()
 #endif
