@@ -7,9 +7,7 @@ import           Data.Maybe                  (fromJust)
 import           Satyros.BellmanFord.Effect  (BellmanFord, negativeCycleCheck,
                                               negativeCycleFind,
                                               negativeCyclePass)
-import           Satyros.BellmanFord.Storage (IDLGraph,
-                                              PositiveInfiniteInt (Finite),
-                                              addPositiveInfiniteInt)
+import           Satyros.BellmanFord.Storage (IDLGraph)
 import qualified Satyros.QFIDL               as QFIDL
 
 negativeCycle :: IDLGraph -> BellmanFord ()
@@ -18,7 +16,7 @@ negativeCycle graph = do
     negativeCycleCheck (f, t)
     (pf, df) <- uses (at f) fromJust
     (_, dt) <- uses (at t) fromJust
-    when (addPositiveInfiniteInt df (Finite w) < dt) $ do
+    when (df + w < dt) $ do
       clc <- getCycleFrom f pf f
       negativeCycleFind clc
   negativeCyclePass

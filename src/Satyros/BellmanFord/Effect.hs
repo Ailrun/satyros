@@ -9,8 +9,7 @@ import           Data.Functor.Classes        (Show1 (liftShowsPrec),
                                               showsUnaryWith)
 import           Data.Functor.Const          (Const (Const))
 import           GHC.Generics                (Generic, Generic1)
-import           Satyros.BellmanFord.Storage (IDLGraphVertex,
-                                              PositiveInfiniteInt, Storage)
+import           Satyros.BellmanFord.Storage (IDLGraphVertex, Storage)
 import qualified Satyros.QFIDL               as QFIDL
 import           Satyros.Util                (showsTernaryWith)
 
@@ -33,7 +32,7 @@ stepBellmanFord d s = first (fmap BellmanFord) $ runState (runFreeT (runBellmanF
 
 data BellmanFordF r
   = PropagationCheck (IDLGraphVertex, IDLGraphVertex) r
-  | PropagationFindShorter IDLGraphVertex (IDLGraphVertex, PositiveInfiniteInt) r
+  | PropagationFindShorter IDLGraphVertex (IDLGraphVertex, Int) r
   | PropagationNth Int r
   | PropagationEnd
   | NegativeCycleCheck (IDLGraphVertex, IDLGraphVertex) r
@@ -54,7 +53,7 @@ propagationCheck :: (IDLGraphVertex, IDLGraphVertex) -> BellmanFord ()
 propagationCheck vs = wrap . PropagationCheck vs $ pure ()
 {-# INLINE propagationCheck #-}
 
-propagationFindShorter :: IDLGraphVertex -> (IDLGraphVertex, PositiveInfiniteInt) -> BellmanFord ()
+propagationFindShorter :: IDLGraphVertex -> (IDLGraphVertex, Int) -> BellmanFord ()
 propagationFindShorter v p = wrap . PropagationFindShorter v p $ pure ()
 {-# INLINE propagationFindShorter #-}
 

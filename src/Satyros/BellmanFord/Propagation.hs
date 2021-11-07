@@ -10,9 +10,7 @@ import           Satyros.BellmanFord.Effect  (BellmanFord, propagationCheck,
                                               propagationEnd,
                                               propagationFindShorter,
                                               propagationNth)
-import           Satyros.BellmanFord.Storage (IDLGraph,
-                                              PositiveInfiniteInt (Finite),
-                                              addPositiveInfiniteInt)
+import           Satyros.BellmanFord.Storage (IDLGraph)
 
 propagation :: IDLGraph -> BellmanFord ()
 propagation (Map.toList -> graph) = do
@@ -22,7 +20,7 @@ propagation (Map.toList -> graph) = do
       propagationCheck (f, t)
       (_, df) <- uses (at f) fromJust
       (pt, dt) <- uses (at t) fromJust
-      when (addPositiveInfiniteInt df (Finite w) < dt) $ do
-        at t .= Just (f, addPositiveInfiniteInt df (Finite w))
+      when (df + w < dt) $ do
+        at t .= Just (f, df + w)
         propagationFindShorter t (pt, dt)
   propagationEnd
