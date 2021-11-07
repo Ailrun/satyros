@@ -13,7 +13,7 @@ import           GHC.Generics           (Generic)
 import           System.Random.Stateful (Random)
 
 newtype Positivity = Positivity Bool
-  deriving stock (Generic, Eq)
+  deriving stock (Generic, Eq, Ord)
   deriving newtype (Show, Random)
 
 makeWrapped ''Positivity

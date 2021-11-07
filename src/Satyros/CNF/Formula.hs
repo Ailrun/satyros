@@ -15,7 +15,7 @@ import           Satyros.CNF.Literal  (Literal)
 import           Satyros.CNF.Variable (Variable)
 
 newtype FormulaLike a = FormulaLike { _clausesOfFormula :: [ClauseLike a] }
-  deriving stock (Generic, Generic1)
+  deriving stock (Generic, Generic1, Eq, Ord)
   deriving newtype (Show, Semigroup, Monoid)
 
 makeWrapped ''FormulaLike

@@ -16,7 +16,7 @@ import           Satyros.CNF.Literal  (Literal, literalToVariable)
 import           Satyros.CNF.Variable (Variable)
 
 newtype ClauseLike a = ClauseLike { _literalsOfClause :: [a] }
-  deriving stock (Generic, Generic1)
+  deriving stock (Generic, Generic1, Eq, Ord)
   deriving newtype (Show, Semigroup, Monoid)
 
 makeWrapped ''ClauseLike
