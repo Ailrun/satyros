@@ -6,7 +6,7 @@ import           Control.Lens            (_2, _Just, _Nothing, _Right, each,
                                           takingWhile, to, use, uses, (%=), (&),
                                           (.=), (<|), (^.), (^..), (|>))
 import           Data.Either             (partitionEithers)
-import           Data.List               (partition)
+import           Data.List.Extra         (nubOrd, partition)
 import           Data.Set                (Set)
 import qualified Data.Set                as Set
 import qualified Satyros.CNF             as CNF
@@ -80,12 +80,10 @@ deriveConflictClauseRelSAT c = do
       where
         (psAtCurrent, psAtLower) = partition ((`Set.member` vl) . CNF.literalToVariable) ps
 
-        (lsWithoutP, ps) = partitionEithers . flip concatMap ls $ \l ->
-          asgn
-          ^.. parentsOfLiteral l
-          . failing (_Just . literalsInParentsOf l . re _Right) (_Nothing . like (Left l))
+        (lsWithoutP, nubOrd -> ps) = partitionEithers . flip concatMap ls $ \l ->
+          asgn ^.. parentsOfLiteral l . failing (_Just . literalsInParentsOf l . re _Right) (_Nothing . like (Left l))
 
-        literalsInParentsOf l = CNF.literalsOfClause . each . filtered (/= CNF.negateLiteral l)
+        literalsInParentsOf l = CNF.literalsOfClause . each . filtered ((&&) <$> (/= l) <*> (/= CNF.negateLiteral l))
 
 levelToSet :: (Maybe CNF.Variable, Set CNF.Variable) -> Set CNF.Variable
 levelToSet (dx, xs) = maybe Set.empty Set.singleton dx <> xs

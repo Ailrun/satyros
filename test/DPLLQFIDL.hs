@@ -8,7 +8,6 @@ import           Control.Monad.Trans.Free   (FreeF (Free, Pure), hoistFreeT,
 import           Data.Bifunctor             (first)
 import           Data.Coerce                (coerce)
 import qualified Data.Map                   as Map
-import           Debug.Trace                (trace)
 import           Satyros.BellmanFord        (BellmanFord, BellmanFordF)
 import qualified Satyros.BellmanFord        as BellmanFord
 import qualified Satyros.CNF                as CNF
@@ -24,14 +23,12 @@ data DPLLQFIDLFailure
 
 example :: CNF.FormulaLike QFIDL.Expressible
 example = coerce
-  [ [QFIDL.Singleton (QFIDL.Variable 1) (QFIDL.::<?) 5]
-  , [QFIDL.Singleton (QFIDL.Variable 1) (QFIDL.::>?) 3]
-  , [QFIDL.Singleton (QFIDL.Variable 2) (QFIDL.::>?) 5]
-  , [QFIDL.Difference (QFIDL.Variable 2) (QFIDL.Variable 1) (QFIDL.::<?) 2, QFIDL.Difference (QFIDL.Variable 1) (QFIDL.Variable 2) (QFIDL.::>?) (- 3)]
+  [ [QFIDL.Difference (QFIDL.Variable 1) (QFIDL.Variable 2) (QFIDL.::<?) 0, QFIDL.Singleton (QFIDL.Variable 3) (QFIDL.::<>?) 1]
+  , [QFIDL.Singleton (QFIDL.Variable 3) (QFIDL.::=?) 1, QFIDL.Difference (QFIDL.Variable 1) (QFIDL.Variable 2) (QFIDL.::<=?) 0]
   ]
 
 testDpllqfidl :: CNF.FormulaLike QFIDL.Expressible -> Either DPLLQFIDLFailure [Int]
-testDpllqfidl = fst . flip dpllqfidl (mkStdGen 0)
+testDpllqfidl = fst . flip dpllqfidl (mkStdGen 2)
 
 dpllqfidl :: CNF.FormulaLike QFIDL.Expressible
           -> StdGen
@@ -60,9 +57,7 @@ loop = go (DPLL.bcp >> pure (Left (DPLLQFIDLException "Post BCP continuation sho
   where
     go d s =
       case DPLL.stepDPLL d s of
-        (Free eff', s')
-          | trace (show eff' <> "       " <> show s') False -> undefined
-          | otherwise -> go (naiveHandler eff') s'
+        (Free eff', s') -> go (naiveHandler eff') s'
         (Pure res, s')  -> (res, s')
 
 naiveHandler :: DPLLF BellmanFordF
