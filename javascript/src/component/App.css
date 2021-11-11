@@ -1,0 +1,36 @@
+.App {
+  text-align: center;
+}
+
+.expression-picker {
+  width: 600px;
+  margin: 0 auto;
+}
+
+.expression-picker select {
+  margin-left: 1em;
+  margin-right: 4em;
+}
+
+.expression-picker span {
+  display: inline-block;
+  width: 30px;
+  text-align: right;
+}
+
+.expression-picker input {
+  margin-left: 1em;
+  margin-right: 4em;
+
+  width: 100px;
+
+  vertical-align: text-top;
+}
+
+.expression-picker input[type="checkbox"] {
+  margin-left: 0.5em;
+
+  width: 20px;
+
+  vertical-align: baseline;
+}

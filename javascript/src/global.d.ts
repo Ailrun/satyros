@@ -13,23 +13,74 @@ declare global {
   type FormulaLike<T> = ClauseLike<T>[];
 
   interface SatyrosAPI {
-    expressedFormula: FormulaLike<Expressed>;
-    conversionTable: SatyrosConversionTable;
-    assignment: SatyrosAssignmentAPI;
-    step(callback: (r?: boolean) => void): void;
+    readonly expressedFormula: FormulaLike<Expressed>;
+    readonly conversionTable: SatyrosConversionTable;
+    readonly getFormula(callback: (f: Formula) => void): void;
+    readonly getImplicationGraph(callback: (vs: SatyrosImplicationVertex[], es: SatyrosImplicationEdge[]) => void): void;
+    readonly getBellmanFordGraph(callback: (vs: SatyrosBellmanFordVertex[], es: SatyrosBellmanFordEdge[]) => void): void;
+    readonly assignment: SatyrosAssignmentAPI;
+    readonly step(callback: SatyrosEffectCallback): void;
+    readonly undo(callback: SatyrosEffectCallback): void;
+  }
+
+  interface SatyrosEffectCallback {
+    Start(repeated: boolean): void;
+    NegativeCyclePass(): void;
+    NegativeCycleFind(): void;
+    NegativeCycleCheck(): void;
+    PropagationEnd(): void;
+    PropagationNth(): void;
+    PropagationFindShorter(): void;
+    PropagationCheck(): void;
+    BacktraceComplete(): void;
+    BacktraceExhaustion(): void;
+    DecisionComplete(): void;
+    DecisionResult(): void;
+    BCPConflictDrivenClause(): void;
+    BCPConflict(): void;
+    BCPComplete(): void;
+    BCPUnitClause(): void;
+    Finish(result: boolean): void
+  }
+
+  interface SatyrosImplicationVertex {
+    readonly variable: number;
+    readonly value: boolean;
+    readonly isDecision: boolean;
+    readonly level: number;
+  }
+
+  interface SatyrosImplicationEdge {
+    readonly startVertex: number;
+    readonly endVertex: number;
+    readonly clauseIndex: number;
+    readonly levelDiff: number;
+  }
+
+  interface SatyrosBellmanFordVertex {
+    readonly variable: number | null;
+    readonly distance: number;
+  }
+
+  interface SatyrosBellmanFordEdge {
+    readonly startVertex: number | null;
+    readonly endVertex: number | null;
+    readonly weight: number;
+    readonly lastActive: boolean;
   }
 
   interface SatyrosConversionTable {
-    variableToExpressed: [[number, Expressed]];
-    expressedToLiteral: [[Expressed, Literal]];
+    readonly variableToExpressed: [number, Expressed][];
+    readonly expressedToLiteral: [Expressed, Literal][];
   }
 
   interface SatyrosAssignmentAPI {
-    getValue(x: number, callback: (a: [boolean, Clause]) => void): void;
-    setValue(x: number, v: [boolean, Clause]): void;
+    readonly getValue(x: number, callback: (a: [boolean, Clause] | null) => void): void;
+    readonly getValueOfClause(i: number, callback: (v: boolean | null) => void): void;
+    readonly getValueOfFormula(callback: (v: boolean | null) => void): void;
   }
 
   interface Window {
-    makeSatyrosAPI: (f: FormulaLike<Expressible>) => SatyrosAPI;
+    readonly makeSatyrosAPI: (f: FormulaLike<Expressible>) => SatyrosAPI;
   }
 }

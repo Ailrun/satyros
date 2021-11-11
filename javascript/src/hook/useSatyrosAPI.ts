@@ -6,7 +6,6 @@ export const useSatyrosAPI = (f : FormulaLike<Expressible>) => {
   React.useEffect(
     () => {
       setTimeout(() => {
-        console.log(window.makeSatyrosAPI);
         setSatyrosAPI(window.makeSatyrosAPI(f));
       }, 500);
     },

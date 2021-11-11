@@ -1,6 +1,65 @@
 import * as d3 from "d3";
 
-const operatorToString = (operator: Operator): string => {
+export const haskellCallWrapper = <T extends any[]>(haskell: (cb: (...args: T) => void) => void): T => {
+  let v: T;
+
+  haskell((...args) => {
+    v = args;
+  });
+
+  return v!;
+}
+
+export const stepsUntil: (step: SatyrosAPI['step'], key: keyof SatyrosEffectCallback, cb: () => void) => SatyrosEffectCallback = (step, key, cb) => {
+  console.log('hi');
+  return Object.assign(oneStep(() => { step(stepsUntil(step, key, cb)) }, () => { step(stepsUntil(step, key, cb)) }, () => { throw new Error('Why Result?!'); }), { [key]: cb });
+}
+
+export const stepsExcept: <T extends Partial<SatyrosEffectCallback>>(step: SatyrosAPI['step'], cbs: T) => SatyrosEffectCallback = (step, cbs) => {
+  return Object.assign(oneStep(() => { step(stepsExcept(step, cbs)); }, () => { step(stepsExcept(step, cbs)); }, () => { throw new Error('Why Result?!'); }), cbs);
+}
+
+export const oneStep: (qfidlStep: () => void, satStep: () => void, resultStep: (r: boolean) => void) => SatyrosEffectCallback = (qfidlStep, satStep, resultStep) => ({
+  Start() {},
+  NegativeCyclePass: qfidlStep,
+  NegativeCycleFind: qfidlStep,
+  NegativeCycleCheck: qfidlStep,
+  PropagationEnd: qfidlStep,
+  PropagationNth: qfidlStep,
+  PropagationFindShorter: qfidlStep,
+  PropagationCheck: qfidlStep,
+  BacktraceComplete: satStep,
+  BacktraceExhaustion: satStep,
+  DecisionComplete: satStep,
+  DecisionResult: satStep,
+  BCPConflictDrivenClause: satStep,
+  BCPConflict: satStep,
+  BCPComplete: satStep,
+  BCPUnitClause: satStep,
+  Finish: resultStep,
+});
+
+export const oneUndo: (qfidlUndo: () => void, satUndo: () => void, startUndo: (repeated: boolean) => void) => SatyrosEffectCallback = (qfidlUndo, satUndo, startUndo) => ({
+  Start: startUndo,
+  NegativeCyclePass: qfidlUndo,
+  NegativeCycleFind: qfidlUndo,
+  NegativeCycleCheck: qfidlUndo,
+  PropagationEnd: qfidlUndo,
+  PropagationNth: qfidlUndo,
+  PropagationFindShorter: qfidlUndo,
+  PropagationCheck: qfidlUndo,
+  BacktraceComplete: satUndo,
+  BacktraceExhaustion: satUndo,
+  DecisionComplete: satUndo,
+  DecisionResult: satUndo,
+  BCPConflictDrivenClause: satUndo,
+  BCPConflict: satUndo,
+  BCPComplete: satUndo,
+  BCPUnitClause: satUndo,
+  Finish() {},
+});
+
+export const operatorToString = (operator: Operator): string => {
   switch (operator) {
     case "::<?": return "<";
     case "::<=?": return "≤";
@@ -11,6 +70,23 @@ const operatorToString = (operator: Operator): string => {
   }
 }
 
+export const expressibleToExpressedFormula = (expressible: Expressible): FormulaLike<Expressed> => {
+  if (expressible.length === 3) {
+    expressible = [expressible[0], 0, expressible[1], expressible[2]];
+  }
+
+  switch (expressible[2]) {
+    case '::<?': return [[[expressible[0], expressible[1], Math.ceil(expressible[3] - 1)]]];
+    case '::<=?': return [[[expressible[0], expressible[1], Math.floor(expressible[3])]]];
+    case '::>?': return [[[expressible[1], expressible[0], Math.ceil(- expressible[3] - 1)]]];
+    case '::>=?': return [[[expressible[1], expressible[0], Math.floor(- expressible[3])]]];
+    case '::=?': return [[[expressible[0], expressible[1], Math.floor(expressible[3])]], [[expressible[1], expressible[0], Math.floor(- expressible[3])]]];
+    case '::<>?': return [[[expressible[0], expressible[1], Math.ceil(expressible[3] - 1)], [expressible[1], expressible[0], Math.ceil(- expressible[3] - 1)]]];
+  }
+};
+
+export const expressedToString = (expressed: Expressed): string => `${expressed[0] === 0 ? 'z' : 'x' + expressed[0]} - ${expressed[1] === 0 ? 'z' : 'x' + expressed[1]} ≤ ${expressed[2]}`;
+
 export const expressibleToString = (expressible: Expressible): string => {
   if (expressible.length === 3) {
     return `x${expressible[0]} ${operatorToString(expressible[1])} ${expressible[2]}`;
@@ -19,14 +95,18 @@ export const expressibleToString = (expressible: Expressible): string => {
   }
 };
 
-export const expressedToString = (expressed: Expressed): string => `x${expressed[0]} - x${expressed[1]} ≤ ${expressed[2]}`;
+export const expressedFormulaToString = (expressedFormula: FormulaLike<Expressed>): string => {
+  return expressedFormula.map(v => v.map(e => expressedToString(e)).join(' ∨ ')).join(' ∧ ');
+};
 
 export const d3fyExpressibleFormula = (expressibleFormula: FormulaLike<Expressible>, e: SVGSVGElement, width: number): void => {
   const space = 70;
   const svg = d3.select(e);
 
   const expressibleG = svg
-    .append('g')
+    .selectAll('g.expressed')
+    .data([0])
+    .join('g')
     .classed('expressible', true)
     .attr('transform', `translate(${width / 2 - expressibleFormula.flat().length * space + space}, 40)`)
 
@@ -87,6 +167,9 @@ export const d3fyExpressibleFormula = (expressibleFormula: FormulaLike<Expressib
 export const d3fyExpressedFormula = (expressedFormula: FormulaLike<Expressed>, e: SVGSVGElement, width: number): void => {
   const space = 70;
   const expressedG = d3.select(e)
+    .selectAll('g.expressed')
+    .data([0])
+    .join('g')
     .classed('expressed', true)
     .attr('transform', `translate(${width / 2 - expressedFormula.flat().length * space + space}, 40)`)
 
