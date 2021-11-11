@@ -1,6 +1,6 @@
 spec-version:                       0.31.0
 name:                               satyros
-version:                            0.3.1.0
+version:                            0.3.1.1
 synopsis:                           Step-by-step SAT solver for educational purposes
 description: |
   Satyros is a step-by-step SAT solver for educational purposes,

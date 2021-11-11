@@ -8,6 +8,7 @@ import           Control.Monad.Trans.Free   (FreeF (Free, Pure), hoistFreeT,
 import           Data.Bifunctor             (first)
 import           Data.Coerce                (coerce)
 import qualified Data.Map                   as Map
+import           Debug.Trace                (trace)
 import           Satyros.BellmanFord        (BellmanFord, BellmanFordF)
 import qualified Satyros.BellmanFord        as BellmanFord
 import qualified Satyros.CNF                as CNF
@@ -57,7 +58,9 @@ loop = go (DPLL.bcp >> pure (Left (DPLLQFIDLException "Post BCP continuation sho
   where
     go d s =
       case DPLL.stepDPLL d s of
-        (Free eff', s') -> go (naiveHandler eff') s'
+        (Free eff', s')
+          | trace (show (s' ^. DPLL.variableLevels)) (trace (show eff') False) -> undefined
+          | otherwise -> go (naiveHandler eff') s'
         (Pure res, s')  -> (res, s')
 
 naiveHandler :: DPLLF BellmanFordF

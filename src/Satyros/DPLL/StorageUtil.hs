@@ -15,6 +15,8 @@ import           Satyros.DPLL.Assignment (assignVariable, eraseVariables,
 import           Satyros.DPLL.Effect     (DPLL)
 import           Satyros.DPLL.Storage    (assignment, clauses,
                                           unassignedVariables, variableLevels)
+import Debug.Trace (trace)
+import Satyros.CNF (negateLiteral)
 
 assignDecisionVariable :: (Functor f) => CNF.Literal -> DPLL s f ()
 assignDecisionVariable l@(CNF.Literal _ x) = do
@@ -75,9 +77,11 @@ deriveConflictClauseRelSAT c = do
   pure . CNF.Clause . Set.toList . go asgn vl $ c ^. CNF.literalsOfClause
   where
     go asgn vl ls
-      | null psAtCurrent = Set.fromList lsWithoutP <> Set.fromList psAtLower
-      | otherwise = Set.fromList lsWithoutP <> Set.fromList psAtLower <> go asgn vl psAtCurrent
+      | null psAtCurrent = nonRecursiveConflictSet
+      | otherwise = nonRecursiveConflictSet <> go asgn vl psAtCurrent
       where
+        nonRecursiveConflictSet =
+          Set.map CNF.negateLiteral $ Set.fromList lsWithoutP <> Set.fromList psAtLower
         (psAtCurrent, psAtLower) = partition ((`Set.member` vl) . CNF.literalToVariable) ps
 
         (lsWithoutP, nubOrd -> ps) = partitionEithers . flip concatMap ls $ \l ->
