@@ -1,22 +1,26 @@
 import * as d3 from 'd3';
 import React from 'react';
+import usePrevious from '@react-hook/previous';
+
 import { expressibleToExpressedFormula } from '../Util';
 
 interface Props {
   width: number;
   height: number;
   expressible: Expressible;
-  convert: boolean;
+  processed: boolean;
 }
 
-const Simplification: React.FunctionComponent<Props> = ({
-  width, height, expressible, convert
+const PreprocessGraph: React.FunctionComponent<Props> = ({
+  width, height, expressible, processed
 }) => {
   const ref = React.useRef<SVGSVGElement>(null);
   const padding = 30;
   const ratio = height / width;
   const xScale = d3.scaleLinear([-5, 5], [-width/2 + padding, width/2 - padding]);
   const yScale = d3.scaleLinear([-5 * ratio, 5 * ratio], [height/2 - padding, -height/2 + padding]);
+  const prevOp = usePrevious(expressible.length === 3 ? expressible[1] : expressible[2]);
+  const prevProcessed = usePrevious(processed);
 
   React.useEffect(() => {
     const svg = d3.select(ref.current);
@@ -28,9 +32,6 @@ const Simplification: React.FunctionComponent<Props> = ({
       .attr('y', -height/2 + padding)
       .attr('width', width - 2 * padding)
       .attr('height', height - 2 * padding)
-
-    svg.append('g')
-      .classed('expression-graph', true);
 
     const xAxis = d3.axisBottom(xScale)
       .ticks(10)
@@ -82,10 +83,17 @@ const Simplification: React.FunctionComponent<Props> = ({
       .attr('y2', 0.5)
       .attr('stroke', 'black')
       .attr('stroke-width', 1);
-  }, []);
+
+    svg.append('g')
+      .classed('expression-graph', true);
+
+    return () => {
+      svg.selectAll().remove();
+    };
+  }, [width, height, xScale, yScale]);
 
   React.useEffect(() => {
-    const path = d3.select(ref.current)
+    let pathTransition = d3.select(ref.current)
       .selectChild('g.expression-graph')
       .selectChildren('path.expressible')
       .data([0])
@@ -96,8 +104,22 @@ const Simplification: React.FunctionComponent<Props> = ({
       .duration(300)
       .ease(d3.easeLinear)
       .attr('stroke-width', 3)
-      .attr('fill', d3.schemeAccent[3])
-      .attr('opacity', convert ? 0 : 1);
+      .attr('fill', d3.schemeAccent[3]);
+
+    if (prevProcessed === processed && !processed && prevOp !== (expressible.length === 3 ? expressible[1] : expressible[2])) {
+      pathTransition = pathTransition.transition()
+        .ease(d3.easeLinear)
+        .duration(150)
+        .attr('opacity', 0)
+        .transition()
+        .ease(d3.easeLinear)
+        .delay(150)
+        .duration(150)
+        .attr('opacity', 0.8);
+    } else {
+      pathTransition = pathTransition
+        .attr('opacity', processed ? 0 : 0.8);
+    }
 
     const line = d3.path();
 
@@ -109,7 +131,7 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[1] + 10));
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', d3.schemeSet1[5]);
           break;
         }
@@ -119,7 +141,7 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[1] + 10));
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', '#FFF');
           break;
         }
@@ -129,7 +151,7 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[1] + 10));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', d3.schemeSet1[5]);
           break;
         }
@@ -139,14 +161,14 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[1] + 10));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', '#FFF');
           break;
         }
         case '::=?': {
           line.moveTo(xScale(expressible[2]), yScale(yScale.domain()[0] - 10));
           line.lineTo(xScale(expressible[2]), yScale(yScale.domain()[1] + 10));
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', d3.schemeSet1[5]);
           break;
         }
@@ -161,7 +183,7 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[1] + 10));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', '#FFF');
           break;
         }
@@ -173,7 +195,7 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 - expressible[3]));
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[1] + 10));
           line.closePath();
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', d3.schemeSet1[5]);
           break;
         }
@@ -182,7 +204,7 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 - expressible[3]));
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[1] + 10));
           line.closePath();
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', '#FFF');
           break;
         }
@@ -191,7 +213,7 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 - expressible[3]));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', d3.schemeSet1[5]);
           break;
         }
@@ -200,14 +222,14 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 - expressible[3]));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', '#FFF');
           break;
         }
         case '::=?': {
           line.moveTo(xScale(xScale.domain()[0] - 10), yScale(xScale.domain()[0] - 10 - expressible[3]));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 - expressible[3]));
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', d3.schemeSet1[5]);
           break;
         }
@@ -220,16 +242,16 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 - expressible[3]));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString())
+          pathTransition.attr('d', line.toString())
             .attr('stroke', '#FFF');
           break;
         }
       }
     }
-  }, [expressible[1], expressible[2], expressible[3], convert]);
+  }, [expressible, processed, prevOp, prevProcessed, xScale, yScale]);
 
   React.useEffect(() => {
-    const path = d3.select(ref.current)
+    let pathTransition = d3.select(ref.current)
       .selectChild('g.expression-graph')
       .selectChildren('path.expressed')
       .data([0])
@@ -242,7 +264,21 @@ const Simplification: React.FunctionComponent<Props> = ({
       .attr('stroke-width', 3)
       .attr('fill', d3.schemeAccent[1])
       .attr('stroke', d3.schemeSet1[3])
-      .attr('opacity', convert ? 1 : 0);
+
+    if (prevProcessed === processed && processed && prevOp !== (expressible.length === 3 ? expressible[1] : expressible[2])) {
+      pathTransition = pathTransition.transition()
+        .ease(d3.easeLinear)
+        .duration(150)
+        .attr('opacity', 0)
+        .transition()
+        .ease(d3.easeLinear)
+        .delay(150)
+        .duration(150)
+        .attr('opacity', 0.8);
+    } else {
+      pathTransition = pathTransition
+        .attr('opacity', processed ? 0.8 : 0);
+    }
 
     const line = d3.path();
 
@@ -251,25 +287,31 @@ const Simplification: React.FunctionComponent<Props> = ({
     if (expressedFormula.length === 1) {
       if (expressedFormula[0].length === 1) {
         if (expressedFormula[0][0][0] === 0) {
-          line.moveTo(xScale(expressedFormula[0][0][2]), yScale(yScale.domain()[0]));
-          line.lineTo(xScale(expressedFormula[0][0][2]), yScale(yScale.domain()[1]));
+          line.moveTo(xScale(-expressedFormula[0][0][2]), yScale(yScale.domain()[0]));
+          line.lineTo(xScale(-expressedFormula[0][0][2]), yScale(yScale.domain()[1]));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[1] + 10));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString());
+          pathTransition.attr('d', line.toString());
         } else if (expressedFormula[0][0][1] === 0) {
           line.moveTo(xScale(expressedFormula[0][0][2]), yScale(yScale.domain()[0]));
           line.lineTo(xScale(expressedFormula[0][0][2]), yScale(yScale.domain()[1]));
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[1] + 10));
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString());
-        } else {
+          pathTransition.attr('d', line.toString());
+        } else if (expressedFormula[0][0][0] === 1) {
           line.moveTo(xScale(xScale.domain()[0] - 10), yScale(xScale.domain()[0] - 10 - expressedFormula[0][0][2]));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 - expressedFormula[0][0][2]));
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[1] + 10));
           line.closePath();
-          path.attr('d', line.toString());
+          pathTransition.attr('d', line.toString());
+        } else {
+          line.moveTo(xScale(xScale.domain()[0] - 10), yScale(xScale.domain()[0] - 10 + expressedFormula[0][0][2]));
+          line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 + expressedFormula[0][0][2]));
+          line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[0] - 10));
+          line.closePath();
+          pathTransition.attr('d', line.toString());
         }
       } else {
         if (expressedFormula[0][0][0] === 0) {
@@ -283,7 +325,7 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[1] + 10));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString());
+          pathTransition.attr('d', line.toString());
         } else if (expressedFormula[0][0][1] === 0) {
           line.moveTo(xScale(-expressedFormula[0][0][2]), yScale(yScale.domain()[0]));
           line.lineTo(xScale(-expressedFormula[0][0][2]), yScale(yScale.domain()[1]));
@@ -295,17 +337,17 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[1] + 10));
           line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString());
+          pathTransition.attr('d', line.toString());
         } else {
-          line.moveTo(xScale(xScale.domain()[0] - 10), yScale(xScale.domain()[0] - 10 - expressedFormula[0][0][2]));
-          line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 - expressedFormula[0][0][2]));
-          line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[1] + 10));
-          line.closePath();
           line.moveTo(xScale(xScale.domain()[0] - 10), yScale(xScale.domain()[0] - 10 + expressedFormula[0][1][2]));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 + expressedFormula[0][1][2]));
           line.lineTo(xScale(xScale.domain()[1] + 10), yScale(yScale.domain()[0] - 10));
           line.closePath();
-          path.attr('d', line.toString());
+          line.moveTo(xScale(xScale.domain()[0] - 10), yScale(xScale.domain()[0] - 10 - expressedFormula[0][0][2]));
+          line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 - expressedFormula[0][0][2]));
+          line.lineTo(xScale(xScale.domain()[0] - 10), yScale(yScale.domain()[1] + 10));
+          line.closePath();
+          pathTransition.attr('d', line.toString());
         }
       }
     } else {
@@ -314,30 +356,22 @@ const Simplification: React.FunctionComponent<Props> = ({
           line.moveTo(xScale(-expressedFormula[0][0][2]), yScale(yScale.domain()[0] - 10));
           line.lineTo(xScale(-expressedFormula[0][0][2]), yScale(yScale.domain()[1] + 10));
         }
-        path.attr('d', line.toString());
+        pathTransition.attr('d', line.toString());
       } else if (expressedFormula[0][0][1] === 0) {
         if (expressedFormula[0][0][2] === - expressedFormula[1][0][2]) {
           line.moveTo(xScale(expressedFormula[0][0][2]), yScale(yScale.domain()[0] - 10));
           line.lineTo(xScale(expressedFormula[0][0][2]), yScale(yScale.domain()[1] + 10));
         }
-        path.attr('d', line.toString());
+        pathTransition.attr('d', line.toString());
       } else {
         if (expressedFormula[0][0][2] === - expressedFormula[1][0][2]) {
-          line.moveTo(xScale(xScale.domain()[0] - 10), yScale(xScale.domain()[0] - 10 + expressedFormula[0][0][2]));
-          line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 + expressedFormula[0][0][2]));
+          line.moveTo(xScale(xScale.domain()[0] - 10), yScale(xScale.domain()[0] - 10 - expressedFormula[0][0][2]));
+          line.lineTo(xScale(xScale.domain()[1] + 10), yScale(xScale.domain()[1] + 10 - expressedFormula[0][0][2]));
         }
-        path.attr('d', line.toString());
+        pathTransition.attr('d', line.toString());
       }
     }
-  }, [expressible[1], expressible[2], expressible[3], convert]);
-
-  React.useEffect(() => {
-    const svg = d3.select(ref.current);
-
-    return () => {
-      svg.selectAll().remove();
-    };
-  }, []);
+  }, [expressible, processed, prevOp, prevProcessed, xScale, yScale]);
 
   return (
     <svg
@@ -349,4 +383,4 @@ const Simplification: React.FunctionComponent<Props> = ({
   );
 };
 
-export default Simplification;
+export default PreprocessGraph;

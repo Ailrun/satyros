@@ -125,10 +125,6 @@ const ClauseDB: React.FunctionComponent<Props> = ({
       .data(formula, d => JSON.stringify(d))
       .join(
         enter => {
-          if (enter.size() > 0) {
-            console.log(enter.data());
-          }
-
           const g = enter.append('g')
             .classed('clause-db-list', true)
             .attr('opacity', 0)

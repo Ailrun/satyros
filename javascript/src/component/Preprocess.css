@@ -1,0 +1,57 @@
+.Preprocess {
+  margin: 2em auto;
+
+  width: 640px;
+
+  text-align: center;
+  text-indent: 0;
+}
+
+.Preprocess .expression-picker {
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.Preprocess .expression-picker select {
+  margin-left: 1em;
+  margin-right: 4em;
+}
+
+.Preprocess .expression-picker div {
+  display: inline-block;
+  vertical-align: middle;
+
+  width: 100px;
+
+  text-align: right;
+}
+
+.Preprocess .expression-picker span {
+  display: inline-block;
+
+  width: 30px;
+
+  text-align: right;
+}
+
+.Preprocess .expression-picker input {
+  margin-left: 1em;
+  margin-right: 4em;
+
+  width: 100px;
+}
+
+.Preprocess .expression-picker input[type="checkbox"] {
+  margin-left: 0.5em;
+  vertical-align: baseline;
+
+  width: 20px;
+}
+
+.Preprocess .expression-viewer {
+  user-select: none;
+}
+
+.Preprocess .invisible {
+  opacity: 0;
+}

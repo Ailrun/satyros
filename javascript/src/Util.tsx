@@ -1,4 +1,5 @@
 import * as d3 from "d3";
+import React, { Fragment } from "react";
 
 export const haskellCallWrapper = <T extends any[]>(haskell: (cb: (...args: T) => void) => void): T => {
   let v: T;
@@ -10,14 +11,11 @@ export const haskellCallWrapper = <T extends any[]>(haskell: (cb: (...args: T) =
   return v!;
 }
 
-export const stepsUntil: (step: SatyrosAPI['step'], key: keyof SatyrosEffectCallback, cb: () => void) => SatyrosEffectCallback = (step, key, cb) => {
-  console.log('hi');
-  return Object.assign(oneStep(() => { step(stepsUntil(step, key, cb)) }, () => { step(stepsUntil(step, key, cb)) }, () => { throw new Error('Why Result?!'); }), { [key]: cb });
-}
-
-export const stepsExcept: <T extends Partial<SatyrosEffectCallback>>(step: SatyrosAPI['step'], cbs: T) => SatyrosEffectCallback = (step, cbs) => {
+export const stepsExcept: (step: SatyrosAPI['step'], cbs: Partial<SatyrosEffectCallback>) => SatyrosEffectCallback = (step, cbs) => {
   return Object.assign(oneStep(() => { step(stepsExcept(step, cbs)); }, () => { step(stepsExcept(step, cbs)); }, () => { throw new Error('Why Result?!'); }), cbs);
 }
+
+export const stepsUntil: (step: SatyrosAPI['step'], key: keyof SatyrosEffectCallback, cb: () => void) => SatyrosEffectCallback = (step, key, cb) => stepsExcept(step, { [key]: cb });
 
 export const oneStep: (qfidlStep: () => void, satStep: () => void, resultStep: (r: boolean) => void) => SatyrosEffectCallback = (qfidlStep, satStep, resultStep) => ({
   Start() {},
@@ -38,6 +36,12 @@ export const oneStep: (qfidlStep: () => void, satStep: () => void, resultStep: (
   BCPUnitClause: satStep,
   Finish: resultStep,
 });
+
+export const undosExcept: (undo: SatyrosAPI['undo'], cbs: Partial<SatyrosEffectCallback>) => SatyrosEffectCallback = (undo, cbs) => {
+  return Object.assign(oneUndo(() => { undo(undosExcept(undo, cbs)); }, () => { undo(undosExcept(undo, cbs)); }, () => { throw new Error('Why Start?!'); }), cbs);
+}
+
+export const undosUntil: (undo: SatyrosAPI['undo'], key: keyof SatyrosEffectCallback, cb: () => void) => SatyrosEffectCallback = (undo, key, cb) => undosExcept(undo, { [key]: cb });
 
 export const oneUndo: (qfidlUndo: () => void, satUndo: () => void, startUndo: (repeated: boolean) => void) => SatyrosEffectCallback = (qfidlUndo, satUndo, startUndo) => ({
   Start: startUndo,
@@ -87,6 +91,12 @@ export const expressibleToExpressedFormula = (expressible: Expressible): Formula
 
 export const expressedToString = (expressed: Expressed): string => `${expressed[0] === 0 ? 'z' : 'x' + expressed[0]} - ${expressed[1] === 0 ? 'z' : 'x' + expressed[1]} ≤ ${expressed[2]}`;
 
+export const expressedToFragment = (expressed: Expressed): React.ReactNode => (
+  <Fragment>
+    {expressed[0] === 0 ? 'z' : <Fragment>x<sub>{expressed[0]}</sub></Fragment>} - {expressed[1] === 0 ? 'z' : <Fragment>x<sub>{expressed[1]}</sub></Fragment>} ≤ {expressed[2]}
+  </Fragment>
+);
+
 export const expressibleToString = (expressible: Expressible): string => {
   if (expressible.length === 3) {
     return `x${expressible[0]} ${operatorToString(expressible[1])} ${expressible[2]}`;
@@ -97,6 +107,26 @@ export const expressibleToString = (expressible: Expressible): string => {
 
 export const expressedFormulaToString = (expressedFormula: FormulaLike<Expressed>): string => {
   return expressedFormula.map(v => v.map(e => expressedToString(e)).join(' ∨ ')).join(' ∧ ');
+};
+
+export const expressedFormulaToFragment = (expressedFormula: FormulaLike<Expressed>): React.ReactNode => {
+  return expressedFormula.map(
+    (expressedClause, i) => (
+      <Fragment key={i}>
+        {i === 0 ? null : ' ∧ '}
+        {
+          expressedClause.map(
+            (expressed, i) => (
+              <Fragment key={i}>
+                {i === 0 ? null : ' ∨ '}
+                {expressedToFragment(expressed)}
+              </Fragment>
+            )
+          )
+        }
+      </Fragment>
+    ),
+  );
 };
 
 export const d3fyExpressibleFormula = (expressibleFormula: FormulaLike<Expressible>, e: SVGSVGElement, width: number): void => {

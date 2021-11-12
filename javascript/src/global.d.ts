@@ -21,6 +21,7 @@ declare global {
     readonly assignment: SatyrosAssignmentAPI;
     readonly step(callback: SatyrosEffectCallback): void;
     readonly undo(callback: SatyrosEffectCallback): void;
+    readonly reset(): void;
   }
 
   interface SatyrosEffectCallback {

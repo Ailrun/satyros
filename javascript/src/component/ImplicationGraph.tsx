@@ -57,7 +57,7 @@ export const ImplicationGraph: React.FunctionComponent<Props> = ({
     ref: ref.current,
     nodeId: d => d.id,
     nodeShape: d => d.isDecision ? 'rect' : 'circle',
-    nodeText: d => `b${d.id}@${d.level} : ${d.value ? 1 : 0}`,
+    nodeText: d => `b${d.id}@${d.level}`,
     nodeFill: d => d3.schemePastel2[d.value ? 0 : 1],
     nodeFillNew: d => d3.schemeSet2[d.value ? 0 : 1],
     linkId: d => d.id,

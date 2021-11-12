@@ -5,9 +5,72 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  color: rgba(0, 0, 0, 0.84);
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+blockquote {
+  color: rgba(0, 0, 0, 0.6);
+}
+
+blockquote.math {
+  color: rgba(0, 0, 0, 0.84);
+
+  font-size: 120%;
+  text-align: center;
+  font-family: serif;
+}
+
+p {
+  -webkit-hyphens: auto;
+  -moz-hyphens: auto;
+  -ms-hyphens: auto;
+  hyphens: auto;
+}
+
+p span.initial {
+  font-size: 250%;
+  float: left;
+  margin: -1pt auto;
+  margin-right: 5pt;
+  font-family: serif;
+}
+
+p.indent {
+  text-indent: 2em;
+}
+
+a.footnote {
+  font-size: 75%;
+  vertical-align: super;
+}
+
+section.side-node {
+  margin: 0 4em;
+
+  padding: 0 1em;
+  border: black solid 1px;
+}
+
+section.side-node h4 {
+  box-sizing: border-box;
+  margin: 0;
+  margin-left: -0.5em;
+  margin-top: -0.5em;
+
+  width: 120px;
+  padding-left: 1em;
+  padding-right: 1em;
+  border: black solid 1px;
+  border-radius: 3px;
+  background: white;
+}
+
+section.Section {
+  margin: 1em 2em;
+  margin-bottom: 3em;
 }

@@ -50,13 +50,6 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
   const linkStrokeNewImpl = linkStrokeNew ?? '#000';
   const linkStrokeActiveImpl = linkStrokeActive ?? linkStrokeNewImpl;
 
-  const newTransition = d3.transition(`forceGraphNew-${id}`)
-    .duration(500)
-    .ease(d3.easeSinIn) as any as d3.Transition<d3.BaseType, any, any, any>;
-  const oldNewTransition = d3.transition(`forceGraphOldNew-${id}`)
-    .duration(500)
-    .ease(d3.easeSinOut) as any as d3.Transition<d3.BaseType, any, any, any>;
-
   React.useEffect(() => {
     const svg = d3.select(ref);
 
@@ -82,7 +75,9 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
       .attr('orient', 'auto')
       .append('path')
       .attr('d', 'M 0 0 8 4 0 8 2 4')
-      .transition(oldNewTransition)
+      .transition()
+      .duration(500)
+      .ease(d3.easeSinOut)
       .duration(3000)
       .attrTween('fill', () => {
         return d3.interpolateRgb(linkStrokeNewImpl, linkStrokeImpl);
@@ -191,7 +186,9 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
             .attr('stroke-linecap', 'round')
             .attr('stroke-linejoin', 'round');
 
-          g.transition(newTransition)
+          g.transition()
+            .duration(500)
+            .ease(d3.easeSinIn)
             .attr('opacity', 1);
 
           if (nodeText !== undefined) {
@@ -200,11 +197,14 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
                 oldNodeTexts.set(this, nodeText(d));
               })
               .text(d => nodeText(d))
+              .classed('node-text', true)
               .attr('y', -10)
               .attr('text-anchor', 'middle')
               .attr('stroke', '#955')
               .attr('stroke-width', 1)
               .clone(true).lower()
+              .classed('node-text', false)
+              .classed('node-text-shade', true)
               .attr('stroke', 'white')
               .attr('stroke-width', 3);
           }
@@ -224,10 +224,15 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
         update => {
           update.each(function(d) {
             const g = d3.select(this).datum(d);
+            g.transition()
+              .duration(500)
+              .ease(d3.easeSinIn)
+              .attr('opacity', 1);
+
             if (nodeText !== undefined) {
               let updated = false;
 
-              g.selectChildren<SVGTextElement, N>('text')
+              g.selectChildren<SVGTextElement, N>('text.node-text')
                 .datum(d)
                 .text(function (d) {
                   const t = nodeText(d);
@@ -240,20 +245,26 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
               if (updated) {
                 g.selectChildren('.node-shape')
                   .datum(d)
-                  .transition(newTransition)
+                  .transition()
+                  .duration(500)
+                  .ease(d3.easeSinIn)
                   .attr('rx', d => nodeShapeImpl(d) === 'rect' ? 0 : radius)
                   .attr('fill', nodeFillNewImpl as any);
               } else {
                 g.selectChildren('.node-shape')
                   .datum(d)
-                  .transition(oldNewTransition)
+                  .transition()
+                  .duration(500)
+                  .ease(d3.easeSinOut)
                   .attr('rx', d => nodeShapeImpl(d) === 'rect' ? 0 : radius)
                   .attr('fill', nodeFillImpl as any);
               }
             } else {
               g.selectChildren('.node-shape')
                 .datum(d)
-                .transition(oldNewTransition)
+                .transition()
+                .duration(500)
+                .ease(d3.easeSinOut)
                 .attr('rx', d => nodeShapeImpl(d) === 'rect' ? 0 : radius)
                 .attr('fill', nodeFillImpl as any);
             }
@@ -277,7 +288,9 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
             .attr('fill', linkStrokeNewImpl)
             .attr('stroke', linkStrokeNewImpl);
 
-          g.transition(newTransition)
+          g.transition()
+            .duration(500)
+            .ease(d3.easeSinIn)
             .attr('opacity', 1);
 
           if (linkText !== undefined) {
@@ -286,8 +299,11 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
                 oldLinkTexts.set(this, linkText(d));
               })
               .text(linkText)
+              .classed('link-text', true)
               .attr('text-anchor', 'middle')
               .clone(true).lower()
+              .classed('link-text', false)
+              .classed('link-text-shade', true)
               .attr('stroke', 'white')
               .attr('stroke-width', 4);
           }
@@ -304,11 +320,15 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
         update => {
           update.each(function (d) {
             const g = d3.select(this).datum(d);
+            g.transition()
+              .duration(500)
+              .ease(d3.easeSinIn)
+              .attr('opacity', 1);
 
             if (linkText !== undefined) {
               let updated = false;
 
-              g.selectChildren<SVGTextElement, N>('text')
+              g.selectChildren<SVGTextElement, N>('text.link-text')
                 .datum(d)
                 .text(function (d) {
                   const t = linkText(d);
@@ -320,20 +340,26 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
                 });
 
               if (updated) {
-                g.transition(newTransition)
+                g.transition()
+                  .duration(500)
+                  .ease(d3.easeSinIn)
                   .attr('stroke', linkStrokeNewImpl as any);
 
                 g.select('path')
                   .attr('marker-end', 'url(#arrow-new)');
               } else {
                 if (linkActive !== undefined && linkActive(d)) {
-                  g.transition(newTransition)
+                  g.transition()
+                    .duration(500)
+                    .ease(d3.easeSinIn)
                     .attr('stroke', linkStrokeActiveImpl as any);
 
                   g.select('path')
                     .attr('marker-end', 'url(#arrow-new)');
                 } else {
-                  g.transition(oldNewTransition)
+                  g.transition()
+                    .duration(500)
+                    .ease(d3.easeSinOut)
                     .attr('stroke', linkStrokeImpl);
 
                   g.select('path')
@@ -342,13 +368,17 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
               }
             } else {
               if (linkActive !== undefined && linkActive(d)) {
-                g.transition(newTransition)
+                g.transition()
+                  .duration(500)
+                  .ease(d3.easeSinOut)
                   .attr('stroke', linkStrokeActiveImpl as any);
 
                 g.select('path')
                   .attr('marker-end', 'url(#arrow-new)');
               } else {
-                g.transition(oldNewTransition)
+                g.transition()
+                  .duration(500)
+                  .ease(d3.easeSinOut)
                   .attr('stroke', linkStrokeImpl);
 
                 g.select('path')
