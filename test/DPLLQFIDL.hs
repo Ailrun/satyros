@@ -22,10 +22,17 @@ data DPLLQFIDLFailure
   | DPLLQFIDLUnsatisfiable String
   deriving stock (Show)
 
-example :: CNF.FormulaLike QFIDL.Expressible
-example = coerce
+example1 :: CNF.FormulaLike QFIDL.Expressible
+example1 = coerce
   [ [QFIDL.Difference (QFIDL.Variable 1) (QFIDL.Variable 2) (QFIDL.::<?) 0, QFIDL.Singleton (QFIDL.Variable 3) (QFIDL.::<>?) 1]
   , [QFIDL.Singleton (QFIDL.Variable 3) (QFIDL.::=?) 1, QFIDL.Difference (QFIDL.Variable 1) (QFIDL.Variable 2) (QFIDL.::<=?) 0]
+  ]
+
+example2 :: CNF.FormulaLike QFIDL.Expressible
+example2 = coerce
+  [ [QFIDL.Difference (QFIDL.Variable 1) (QFIDL.Variable 2) (QFIDL.::<=?) 4]
+  , [QFIDL.Difference (QFIDL.Variable 2) (QFIDL.Variable 3) (QFIDL.::<=?) 5]
+  , [QFIDL.Difference (QFIDL.Variable 3) (QFIDL.Variable 1) (QFIDL.::<=?) (-10)]
   ]
 
 testDpllqfidl :: CNF.FormulaLike QFIDL.Expressible -> Either DPLLQFIDLFailure [Int]
