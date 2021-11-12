@@ -32,7 +32,12 @@ naiveHandler DPLL.DecisionComplete = do
   liftBellmanFord _3 $ BellmanFord.propagation g
   pure False
 naiveHandler DPLL.BacktraceExhaustion = pure False
-naiveHandler (DPLL.BacktraceComplete c l) = DPLL.backtraceCompleteHandler c l >> DPLL.decision >> pure False
+naiveHandler (DPLL.BacktraceComplete c l) = do
+  DPLL.theory . _2 .= Map.empty
+  DPLL.theory . _3 .= Map.empty
+  DPLL.backtraceCompleteHandler c l
+  DPLL.decision
+  pure False
 naiveHandler (DPLL.InsideDPLL (BellmanFord.PropagationCheck e r)) = do
   DPLL.theory . _4 .= e
   r
@@ -49,15 +54,11 @@ naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleCheck e r)) = do
   DPLL.theory . _4 .= e
   r
 naiveHandler (DPLL.InsideDPLL (BellmanFord.NegativeCycleFind c)) = do
-  DPLL.theory . _2 .= Map.empty
-  DPLL.theory . _3 .= Map.empty
   DPLL.theory . _4 .= (BellmanFord.rootIDLGraphVertex, BellmanFord.rootIDLGraphVertex)
   m <- use (DPLL.theory . _1 . _2)
   DPLL.bcpConflictRelSATHandler $ CNF.Clause (fmap (m Map.!) c)
   pure False
 naiveHandler (DPLL.InsideDPLL BellmanFord.NegativeCyclePass) = do
-  DPLL.theory . _2 .= Map.empty
-  DPLL.theory . _3 .= Map.empty
   DPLL.theory . _4 .= (BellmanFord.rootIDLGraphVertex, BellmanFord.rootIDLGraphVertex)
   pure True
 

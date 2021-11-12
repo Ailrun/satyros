@@ -29,8 +29,8 @@ import qualified Data.Vector                 as Vector
 import           GHC.Generics                (Generic)
 import           Language.Javascript.JSaddle (FromJSVal (fromJSVal), Function,
                                               JSM, JSString, JSVal, ToJSVal,
-                                              call, global, js, js0, js1,
-                                              toJSVal, (!!), (!))
+                                              call, js0, js1, toJSVal, (!!),
+                                              (!))
 import qualified Satyros.BellmanFord         as BellmanFord
 import           Satyros.BellmanFord.Effect  (BellmanFordF)
 import qualified Satyros.CNF                 as CNF
@@ -45,8 +45,7 @@ import           System.Random.Stateful      (mkStdGen)
 
 data SatyrosAPI
   = SatyrosAPI
-    { myfun               :: Function
-    , expressedFormula    :: CNF.FormulaLike QFIDL.Expressed
+    { expressedFormula    :: CNF.FormulaLike QFIDL.Expressed
     , getFormula          :: Function
     , conversionTable     :: SatyrosConversionTable
     , assignment          :: SatyrosAssignmentAPI
@@ -54,6 +53,7 @@ data SatyrosAPI
     , getBellmanFordGraph :: Function
     , step                :: Function
     , undo                :: Function
+    , reset               :: Function
     }
   deriving stock (Generic)
   deriving anyclass (ToJSVal)
@@ -123,9 +123,9 @@ makeSatyrosAPI = pure $ \jf -> do
     (cnf, t) = QFIDL.toCNF f
     s = fromRight' $ DPLL.initializeStorage cnf stdGen (t, Map.empty, Map.empty, (BellmanFord.rootIDLGraphVertex, BellmanFord.rootIDLGraphVertex))
   tsRef <- liftIO $ newIORef ((s, Nothing, DPLL.bcp >> pure False) :| [])
-  myfun <- function0 (\_ _ -> global ^. js ("console" :: JSString) . js1 ("log" :: JSString) f >> pure ())
   step <- function1 $ makeStep tsRef
   undo <- function1 $ makeUndo tsRef
+  reset <- function0 $ makeReset tsRef
   let
     expressedFormula =
       cnf
@@ -170,7 +170,11 @@ makeUndo tsRef _ _ cb = do
       liftIO $ writeIORef tsRef (t' :| ts')
       case meff of
         Just eff -> invokeEffectCallback cb eff
-        Nothing -> void $ cb ^. js1 ("Start" :: JSString) False
+        Nothing  -> void $ cb ^. js1 ("Start" :: JSString) False
+
+makeReset :: IORef SatyrosAPIHistory -> JSVal -> JSVal -> JSM ()
+makeReset tsRef _ _ = do
+  liftIO $ modifyIORef' tsRef (pure . NE.last)
 
 invokeEffectCallback :: JSVal -> DPLLF BellmanFordF a -> JSM ()
 invokeEffectCallback cb DPLL.BCPUnitClause{} = void $ cb ^. js0 ("BCPUnitClause" :: JSString)
