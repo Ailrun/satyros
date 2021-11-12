@@ -1,0 +1,183 @@
+code size summary per package:
+
+base:                    470290
+containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG:55069
+extra-1.7.10-d76018cb8518ff171e0305ab0f75838e7c5774558f1e4737d13944e0077e617b:20819
+free-5.1.7-50f1c5e6b8b606f6bd9fd3c7c90726a034516e3e8639ab50e135aa9288f970a0:701
+ghc-prim:                32860
+ghcjs-base-0.2.0.3-80353eb4ced1c08fe2c7663c4be1856e075f868353321e22a68a8d874a25254c:15177
+ghcjs-prim-0.1.1.0-EXzjGVHQlAS2XAXcu0iCbS:9027
+integer-gmp:             6323
+jsaddle-0.9.8.0-e6dd9a48f67bab859fa9e582d5dd79b4eaecd43267c3ad403e90864f48d9e695:5256
+lens-5.0.1-580c8f3ef428a94ada2f97c360a212969edb1a483aee41d1c05545dea873cd30:10703
+main:                    21671
+profunctors-5.6.2-8fd9df0a6dd2c4b8058661b5031cf0f514efd4ebba8ad7169899fe90e7e0ef19:8225
+satyros-0.3.1.3-a037703c0d1ff521790f03af59f70cbf5510a73735ee38f5cbd226ba55ed4a5f:544714
+satyros-ui-haskell-0.1.0.0-inplace:197171
+semigroupoids-5.3.6-e310043383482ce50129ffb1969464a0a595be1abf415300ca528590db6573b7:9035
+splitmix-0.1.0.4-6a8083cdaee6584130cd1ff7f684480444e3d41ea12790049d706a00f48292f7:280
+transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s:1924
+vector-0.12.3.1-27b167672a6fc314dbc1ab438da26924af6ecb05af35dd9853e6ed8953fd3648:8249
+
+
+code size per module:
+
+base
+    Control.Exception.Base:             1473
+    Data.Either:                        212
+    Data.Functor.Const:                 224
+    Data.Functor.Identity:              534
+    Data.List.NonEmpty:                 270
+    Data.Maybe:                         281
+    Data.Monoid:                        1550
+    Data.OldList:                       167
+    Data.Tuple:                         73996
+    Data.Typeable.Internal:             10700
+    Foreign.C.Error:                    1574
+    Foreign.Marshal.Alloc:              3219
+    Foreign.Storable:                   3353
+    GHC.Arr:                            9313
+    GHC.Base:                           582
+    GHC.Char:                           4195
+    GHC.Conc.Sync:                      271
+    GHC.Enum:                           1540
+    GHC.Err:                            10644
+    GHC.Exception:                      1041
+    GHC.Exception.Type:                 6654
+    GHC.Fingerprint:                    1043
+    GHC.Fingerprint.Type:               164
+    GHC.Float:                          324
+    GHC.Float.RealFracMethods:          11962
+    GHC.Foreign:                        1296
+    GHC.ForeignPtr:                     663
+    GHC.Generics:                       3510
+    GHC.IO:                             1241
+    GHC.IO.Buffer:                      850
+    GHC.IO.BufferedIO:                  1248
+    GHC.IO.Device:                      1044
+    GHC.IO.Encoding:                    906
+    GHC.IO.Encoding.Failure:            983
+    GHC.IO.Encoding.Types:              62030
+    GHC.IO.Encoding.UTF8:               22855
+    GHC.IO.Exception:                   34892
+    GHC.IO.FD:                          368
+    GHC.IO.Handle:                      7182
+    GHC.IO.Handle.FD:                   27161
+    GHC.IO.Handle.Internals:            3651
+    GHC.IO.Handle.Types:                1012
+    GHC.Int:                            6223
+    GHC.List:                           174
+    GHC.MVar:                           244
+    GHC.Maybe:                          174
+    GHC.Ptr:                            8768
+    GHC.Read:                           236
+    GHC.Real:                           180
+    GHC.STRef:                          6307
+    GHC.Show:                           4160
+    GHC.Stack.CCS:                      1268
+    GHC.Stack.Types:                    14568
+    GHC.TopHandler:                     1885
+    GHC.Unicode:                        459
+    GHC.Word:                           15724
+    System.Posix.Internals:             23070
+    Text.ParserCombinators.ReadP:       1
+    Text.ParserCombinators.ReadPrec:    1520
+    Text.Read:                          65197
+    Text.Read.Lex:                      3954
+
+containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG
+    Data.Map.Internal:                  53904
+    Data.Set.Internal:                  1165
+
+extra-1.7.10-d76018cb8518ff171e0305ab0f75838e7c5774558f1e4737d13944e0077e617b
+    Data.Either.Extra:                  13312
+    Data.List.Extra:                    7507
+
+free-5.1.7-50f1c5e6b8b606f6bd9fd3c7c90726a034516e3e8639ab50e135aa9288f970a0
+    Control.Monad.Trans.Free:           701
+
+ghc-prim
+    GHC.CString:                        7168
+    GHC.Classes:                        139
+    GHC.IntWord64:                      2617
+    GHC.Tuple:                          3485
+    GHC.Types:                          19451
+
+ghcjs-base-0.2.0.3-80353eb4ced1c08fe2c7663c4be1856e075f868353321e22a68a8d874a25254c
+    GHCJS.Foreign.Internal:             6180
+    GHCJS.Marshal:                      5105
+    GHCJS.Marshal.Internal:             2141
+    GHCJS.Marshal.Pure:                 655
+    JavaScript.Array.Internal:          1096
+
+ghcjs-prim-0.1.1.0-EXzjGVHQlAS2XAXcu0iCbS
+    GHCJS.Prim:                         3632
+    GHCJS.Prim.Internal:                5395
+
+integer-gmp
+    GHC.Integer.Type:                   6323
+
+jsaddle-0.9.8.0-e6dd9a48f67bab859fa9e582d5dd79b4eaecd43267c3ad403e90864f48d9e695
+    Language.Javascript.JSaddle.Arguments:521
+    Language.Javascript.JSaddle.Object: 4735
+
+lens-5.0.1-580c8f3ef428a94ada2f97c360a212969edb1a483aee41d1c05545dea873cd30
+    Control.Lens.Internal.Bazaar:       7043
+    Control.Lens.Internal.Magma:        443
+    Control.Lens.Lens:                  2276
+    Control.Lens.Traversal:             714
+    Control.Lens.Tuple:                 227
+
+main
+    Main:                               21671
+
+profunctors-5.6.2-8fd9df0a6dd2c4b8058661b5031cf0f514efd4ebba8ad7169899fe90e7e0ef19
+    Data.Profunctor.Sieve:              8225
+
+satyros-0.3.1.3-a037703c0d1ff521790f03af59f70cbf5510a73735ee38f5cbd226ba55ed4a5f
+    Satyros.BellmanFord.Effect:         26048
+    Satyros.BellmanFord.NegativeCycle:  49749
+    Satyros.BellmanFord.Propagation:    84362
+    Satyros.BellmanFord.Storage:        1661
+    Satyros.CNF.Clause:                 358
+    Satyros.CNF.Formula:                1900
+    Satyros.CNF.Literal:                3989
+    Satyros.CNF.Variable:               24712
+    Satyros.DPLL.Assignment:            17800
+    Satyros.DPLL.BCP:                   30999
+    Satyros.DPLL.Backtrace:             8174
+    Satyros.DPLL.Decision:              9537
+    Satyros.DPLL.Effect:                61895
+    Satyros.DPLL.Storage:               122871
+    Satyros.DPLL.StorageUtil:           40162
+    Satyros.QFIDL.Conversion:           15028
+    Satyros.QFIDL.Expressed:            4843
+    Satyros.QFIDL.Expressible:          1
+    Satyros.QFIDL.Variable:             40625
+
+satyros-ui-haskell-0.1.0.0-inplace
+    Satyros.Handler.Naive:              188950
+    Satyros.UI:                         7170
+    Satyros.UI.Util:                    1051
+
+semigroupoids-5.3.6-e310043383482ce50129ffb1969464a0a595be1abf415300ca528590db6573b7
+    Data.Functor.Bind.Class:            2794
+    Data.Semigroup.Traversable.Class:   6241
+
+splitmix-0.1.0.4-6a8083cdaee6584130cd1ff7f684480444e3d41ea12790049d706a00f48292f7
+    System.Random.SplitMix:             280
+
+transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s
+    Control.Monad.Trans.State.Lazy:     788
+    Control.Monad.Trans.State.Strict:   1136
+
+vector-0.12.3.1-27b167672a6fc314dbc1ab438da26924af6ecb05af35dd9853e6ed8953fd3648
+    Data.Vector:                        1081
+    Data.Vector.Fusion.Bundle.Size:     5461
+    Data.Vector.Internal.Check:         756
+    Data.Vector.Mutable:                951
+
+
+
+packed metadata: 314572
+
