@@ -84,7 +84,7 @@ const Example3: React.FunctionComponent = () => {
         ));
         break;
     }
-  }, [satyrosAPI, stage, satStep, qfidlStep]);
+  }, [satyrosAPI, stage, qfidlStep]);
   const undo = React.useCallback(() => {
     switch (stage) {
       case 4:
