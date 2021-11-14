@@ -35,6 +35,42 @@ example2 = coerce
   , [QFIDL.Difference (QFIDL.Variable 3) (QFIDL.Variable 1) (QFIDL.::<=?) (-10)]
   ]
 
+example3 :: CNF.FormulaLike QFIDL.Expressible
+example3 = coerce
+  [ [ QFIDL.Difference (QFIDL.Variable 1) (QFIDL.Variable 4) (QFIDL.::>=?) 4
+    , QFIDL.Difference (QFIDL.Variable 4) (QFIDL.Variable 1) (QFIDL.::>=?) 5
+    ]
+  , [ QFIDL.Difference (QFIDL.Variable 4) (QFIDL.Variable 5) (QFIDL.::>=?) 4
+    , QFIDL.Difference (QFIDL.Variable 5) (QFIDL.Variable 4) (QFIDL.::>=?) 4
+    ]
+  , [ QFIDL.Difference (QFIDL.Variable 5) (QFIDL.Variable 1) (QFIDL.::>=?) 5
+    , QFIDL.Difference (QFIDL.Variable 1) (QFIDL.Variable 5) (QFIDL.::>=?) 4
+    ]
+  , [ QFIDL.Difference (QFIDL.Variable 2) (QFIDL.Variable 3) (QFIDL.::>=?) 1
+    , QFIDL.Difference (QFIDL.Variable 3) (QFIDL.Variable 2) (QFIDL.::>=?) 2
+    ]
+  , [ QFIDL.Singleton (QFIDL.Variable 1) (QFIDL.::>=?) 0
+    ]
+  , [ QFIDL.Singleton (QFIDL.Variable 1) (QFIDL.::<=?) (13 - 5)
+    ]
+  , [ QFIDL.Singleton (QFIDL.Variable 2) (QFIDL.::>=?) 0
+    ]
+  , [ QFIDL.Singleton (QFIDL.Variable 2) (QFIDL.::<=?) (13 - 2)
+    ]
+  , [ QFIDL.Singleton (QFIDL.Variable 3) (QFIDL.::>=?) 0
+    ]
+  , [ QFIDL.Singleton (QFIDL.Variable 3) (QFIDL.::<=?) (13 - 1)
+    ]
+  , [ QFIDL.Singleton (QFIDL.Variable 4) (QFIDL.::>=?) 0
+    ]
+  , [ QFIDL.Singleton (QFIDL.Variable 4) (QFIDL.::<=?) (13 - 4)
+    ]
+  , [ QFIDL.Singleton (QFIDL.Variable 5) (QFIDL.::>=?) 0
+    ]
+  , [ QFIDL.Singleton (QFIDL.Variable 5) (QFIDL.::<=?) (13 - 4)
+    ]
+  ]
+
 testDpllqfidl :: CNF.FormulaLike QFIDL.Expressible -> Either DPLLQFIDLFailure [Int]
 testDpllqfidl = fst . flip dpllqfidl (mkStdGen 2)
 
