@@ -25,7 +25,7 @@ rootIDLGraphVertex :: IDLGraphVertex
 rootIDLGraphVertex = Nothing
 
 initializeStorage :: [QFIDL.Expressed] -> (IDLGraph, Storage)
-initializeStorage es = (Map.fromList $ [((rootIDLGraphVertex, rootIDLGraphVertex), 0)] <> ((, 0) . (rootIDLGraphVertex, ) . Just <$> vars) <> edges, Map.fromList . ((rootIDLGraphVertex, (rootIDLGraphVertex, 0)) :) $ ((,) <*> (, 0)) . Just <$> vars)
+initializeStorage es = (Map.fromListWith min $ [((rootIDLGraphVertex, rootIDLGraphVertex), 0)] <> ((, 0) . (rootIDLGraphVertex, ) . Just <$> vars) <> edges, Map.fromList . ((rootIDLGraphVertex, (rootIDLGraphVertex, 0)) :) $ ((,) <*> (, 0)) . Just <$> vars)
   where
     vars = Set.toList . Set.unions $ fmap QFIDL.variablesInExpressed es
 
