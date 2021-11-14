@@ -66,7 +66,7 @@ loop = go (DPLL.bcp >> pure (Left (DPLLQFIDLException "Post BCP continuation sho
     go d s =
       case DPLL.stepDPLL d s of
         (Free eff', s')
-          | trace (show (s' ^. DPLL.variableLevels)) (trace (show eff') False) -> undefined
+          | trace (show eff') False -> undefined
           | otherwise -> go (naiveHandler eff') s'
         (Pure res, s')  -> (res, s')
 
@@ -92,7 +92,7 @@ naiveHandler DPLL.DecisionComplete = do
   liftBellmanFord _2 $ BellmanFord.propagation g
   pure (Left (DPLLQFIDLException "Post Bellman-Ford propagation continuation should not be reachable"))
 naiveHandler DPLL.BacktraceExhaustion = pure . Left $ DPLLQFIDLUnsatisfiable "Possibilities are exhausted"
-naiveHandler (DPLL.BacktraceComplete c l) = DPLL.backtraceCompleteHandler c l >> DPLL.decision >> pure (Left (DPLLQFIDLException "Post decision continuation should not be reachable"))
+naiveHandler (DPLL.BacktraceComplete c l) = DPLL.backtraceCompleteHandler c l >> DPLL.bcp >> pure (Left (DPLLQFIDLException "Post BCP continuation should not be reachable"))
 naiveHandler (DPLL.InsideDPLL (BellmanFord.PropagationCheck _ r)) = r
 naiveHandler (DPLL.InsideDPLL (BellmanFord.PropagationFindShorter _ _ r)) = r
 naiveHandler (DPLL.InsideDPLL (BellmanFord.PropagationNth _ r)) = r

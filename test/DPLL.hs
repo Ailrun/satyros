@@ -49,5 +49,5 @@ naiveHandler (DPLL.BCPConflictDrivenClause c r) = DPLL.backtrace c >> r
 naiveHandler (DPLL.DecisionResult l) = DPLL.decisionResultHandler l >> DPLL.bcp >> pure (Left (DPLLException "Post BCP continuation should not be reachable"))
 naiveHandler DPLL.DecisionComplete = uses DPLL.assignment $ Right . fmap fst . Map.elems . DPLL.getAssignment
 naiveHandler DPLL.BacktraceExhaustion = pure . Left $ DPLLUnsatisfiable "Possibilities are exhausted"
-naiveHandler (DPLL.BacktraceComplete c l) = DPLL.backtraceCompleteHandler c l >> DPLL.decision >> pure (Left (DPLLException "Post decision continuation should not be reachable"))
+naiveHandler (DPLL.BacktraceComplete c l) = DPLL.backtraceCompleteHandler c l >> DPLL.bcp >> pure (Left (DPLLException "Post BCP continuation should not be reachable"))
 naiveHandler (DPLL.InsideDPLL (Const x)) = absurd x
