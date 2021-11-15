@@ -38,12 +38,12 @@ import qualified Satyros.CNF                 as CNF
 import qualified Satyros.CNF                 as DPLL
 import           Satyros.DPLL                (DPLL, DPLLF)
 import qualified Satyros.DPLL                as DPLL
+import           Satyros.Handler.Clever      (cleverHandler)
 import           Satyros.Handler.Naive       (naiveHandler)
 import           Satyros.Handler.Type        (InternalStorage, Storage)
 import qualified Satyros.QFIDL               as QFIDL
 import           Satyros.UI.Util             (function0, function1, function2)
 import           System.Random.Stateful      (mkStdGen)
-import Satyros.Handler.Clever (cleverHandler)
 
 data SatyrosAPI
   = SatyrosAPI
