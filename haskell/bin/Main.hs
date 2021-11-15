@@ -13,6 +13,8 @@ main = do
   pure ()
 #else
   (makeSatyrosAPI >>= syncCallback1') >>= setSatyrosAPI
+  (makeSatyrosAPI1 >>= syncCallback1') >>= setSatyrosAPI1
 
 foreign import javascript unsafe "window.makeSatyrosAPI = $1" setSatyrosAPI :: Callback (JSVal -> IO JSVal) -> IO ()
+foreign import javascript unsafe "window.makeSatyrosAPI1 = $1" setSatyrosAPI1 :: Callback (JSVal -> IO JSVal) -> IO ()
 #endif

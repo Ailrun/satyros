@@ -4,6 +4,7 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Satyros.UI
   ( makeSatyrosAPI
+  , makeSatyrosAPI1
   ) where
 
 import           Prelude                     hiding ((!!))
@@ -37,15 +38,17 @@ import qualified Satyros.CNF                 as CNF
 import qualified Satyros.CNF                 as DPLL
 import           Satyros.DPLL                (DPLL, DPLLF)
 import qualified Satyros.DPLL                as DPLL
-import           Satyros.Handler.Naive       (InternalStorage, Storage,
-                                              naiveHandler)
+import           Satyros.Handler.Naive       (naiveHandler)
+import           Satyros.Handler.Type        (InternalStorage, Storage)
 import qualified Satyros.QFIDL               as QFIDL
 import           Satyros.UI.Util             (function0, function1, function2)
 import           System.Random.Stateful      (mkStdGen)
+import Satyros.Handler.Clever (cleverHandler)
 
 data SatyrosAPI
   = SatyrosAPI
-    { expressedFormula    :: CNF.FormulaLike QFIDL.Expressed
+    { initialFormula      :: CNF.Formula
+    , expressedFormula    :: CNF.FormulaLike QFIDL.Expressed
     , getFormula          :: Function
     , conversionTable     :: SatyrosConversionTable
     , assignment          :: SatyrosAssignmentAPI
@@ -68,9 +71,11 @@ data SatyrosConversionTable
 
 data SatyrosAssignmentAPI
   = SatyrosAssignmentAPI
-    { getValue          :: Function
-    , getValueOfClause  :: Function
-    , getValueOfFormula :: Function
+    { getValueMapList         :: Function
+    , getValue                :: Function
+    , getValueOfClauseMapList :: Function
+    , getValueOfClause        :: Function
+    , getValueOfFormula       :: Function
     }
   deriving stock (Generic)
   deriving anyclass (ToJSVal)
@@ -119,14 +124,49 @@ makeSatyrosAPI :: JSM (JSVal -> JSM JSVal)
 makeSatyrosAPI = pure $ \jf -> do
   f <- fromJust <$> fromJSVal jf
   let
-    stdGen = mkStdGen 2
+    stdGen = mkStdGen 0
     (cnf, t) = QFIDL.toCNF f
-    s = fromRight' $ DPLL.initializeStorage cnf stdGen (t, Map.empty, Map.empty, (BellmanFord.rootIDLGraphVertex, BellmanFord.rootIDLGraphVertex))
+    s = fromRight' $ DPLL.initializeStorage cnf stdGen (t, Map.empty, Map.empty, Set.empty)
   tsRef <- liftIO $ newIORef ((s, Nothing, DPLL.bcp >> pure False) :| [])
   step <- function1 $ makeStep tsRef
   undo <- function1 $ makeUndo tsRef
   reset <- function0 $ makeReset tsRef
   let
+    initialFormula = cnf
+    expressedFormula =
+      cnf
+      ^. CNF.clausesOfFormula
+      . partsOf
+        ( each
+          . CNF.literalsOfClause
+          . partsOf
+            ( each
+              . to (\(CNF.Literal p x) -> (x, p ^. CNF.isPositive))
+            )
+          . to (QFIDL.fromAssignment t)
+          . from CNF.entriesOfClauseLike
+        )
+      . from CNF.clauseLikesOfFormulaLike
+    conversionTable = SatyrosConversionTable (Map.toList $ fst t) (Map.toList $ snd t)
+  getFormula <- makeGetFormula tsRef
+  assignment <- makeAssignmentAPI tsRef
+  getImplicationGraph <- makeGetImplicationGraph tsRef
+  getBellmanFordGraph <- makeGetBellmanFordGraph tsRef
+  toJSVal SatyrosAPI{..}
+
+makeSatyrosAPI1 :: JSM (JSVal -> JSM JSVal)
+makeSatyrosAPI1 = pure $ \jf -> do
+  f <- fromJust <$> fromJSVal jf
+  let
+    stdGen = mkStdGen 0
+    (cnf, t) = QFIDL.toCNF f
+    s = fromRight' $ DPLL.initializeStorage cnf stdGen (t, Map.empty, Map.empty, Set.empty)
+  tsRef <- liftIO $ newIORef ((s, Nothing, DPLL.bcp >> pure False) :| [])
+  step <- function1 $ makeStep1 tsRef
+  undo <- function1 $ makeUndo tsRef
+  reset <- function0 $ makeReset tsRef
+  let
+    initialFormula = cnf
     expressedFormula =
       cnf
       ^. CNF.clausesOfFormula
@@ -159,6 +199,19 @@ makeStep tsRef _ _ cb = do
       void $ cb ^. js1 ("Finish" :: JSString) b
     Free eff -> do
       liftIO $ modifyIORef' tsRef ((s', Just eff, naiveHandler eff) NE.<|)
+      invokeEffectCallback cb eff
+
+makeStep1 :: IORef SatyrosAPIHistory -> JSVal -> JSVal -> JSVal -> JSM ()
+makeStep1 tsRef _ _ cb = do
+  (s, _, next) :| _ <- liftIO $ readIORef tsRef
+  let
+    (feff, s') = DPLL.stepDPLL next s
+  case feff of
+    Pure b   -> do
+      liftIO $ modifyIORef' tsRef ((s', Nothing, pure b) NE.<|)
+      void $ cb ^. js1 ("Finish" :: JSString) b
+    Free eff -> do
+      liftIO $ modifyIORef' tsRef ((s', Just eff, cleverHandler eff) NE.<|)
       invokeEffectCallback cb eff
 
 makeUndo :: IORef SatyrosAPIHistory -> JSVal -> JSVal -> JSVal -> JSM ()
@@ -195,15 +248,29 @@ invokeEffectCallback cb (DPLL.InsideDPLL BellmanFord.NegativeCyclePass) = void $
 
 makeAssignmentAPI :: IORef SatyrosAPIHistory -> JSM SatyrosAssignmentAPI
 makeAssignmentAPI tsRef = do
+  getValueMapList <- function1 makeGetValueMapList
   getValue <- function2 makeGetValue
   getValueOfClause <- function2 makeGetValueOfClause
+  getValueOfClauseMapList <- function1 makeGetValueOfClauseMapList
   getValueOfFormula <- function1 makeGetValueOfFormula
   pure SatyrosAssignmentAPI{..}
   where
+    makeGetValueMapList _ this cb = do
+      ts <- liftIO $ readIORef tsRef
+      void $ call cb this [ts ^. head1 . _1 . DPLL.assignment . _Wrapped' . to Map.toList]
+
     makeGetValue _ this jx cb = do
       x <- fromJust <$> fromJSVal jx
       ts <- liftIO $ readIORef tsRef
       void $ call cb this [ts ^. head1 . _1 . DPLL.assignment . at x]
+
+    makeGetValueOfClauseMapList _ this cb = do
+      ts <- liftIO $ readIORef tsRef
+      let
+        s = ts ^. head1 . _1
+        asgn = s ^. DPLL.assignment
+        cv = s ^.. DPLL.clauses . each . DPLL.literalsOfClause . to (valueOfLiterals asgn)
+      void $ call cb this [zip [(0 :: Int)..] cv]
 
     makeGetValueOfClause _ this ji cb = do
       i <- fromJust <$> fromJSVal ji
@@ -257,12 +324,12 @@ makeGetImplicationGraph tsRef = do
           $ s ^. DPLL.variableLevels
         varToLevel = Map.fromList $ (\SatyrosImplicationVertex{..} -> (variable, level)) <$> leveledVs
         impls =
-          concatMap (\(startVertex, (_, c)) ->
-                        c ^.. _Just . CNF.literalsOfClause . each . to CNF.literalToVariable . filtered (/= startVertex) . to (makeEdge varToLevel (s ^. DPLL.clauses . to (fromJust . Vector.elemIndex (fromJust c))) startVertex))
+          concatMap (\(endVertex, (_, c)) ->
+                        c ^.. _Just . CNF.literalsOfClause . each . to CNF.literalToVariable . filtered (/= endVertex) . to (makeEdge varToLevel (s ^. DPLL.clauses . to (fromJust . Vector.elemIndex (fromJust c))) endVertex))
           $ s ^. DPLL.assignment . _Wrapped' . to Map.toList
       void $ call cb this [toJSVal leveledVs, toJSVal impls]
 
-    makeEdge varToLevel clauseIndex startVertex endVertex =
+    makeEdge varToLevel clauseIndex endVertex startVertex =
       let
         levelDiff = varToLevel Map.! endVertex - varToLevel Map.! startVertex
       in
@@ -282,7 +349,7 @@ makeGetBellmanFordGraph tsRef = do
           filter (\SatyrosBellmanFordEdge{..} -> startVertex /= endVertex)
           . fmap (\((startVertex, endVertex), weight) ->
                      let
-                       lastActive = lastActiveE == (startVertex, endVertex)
+                       lastActive = (startVertex, endVertex) `Set.member` lastActiveE
                      in
                        SatyrosBellmanFordEdge{..}
                  )
