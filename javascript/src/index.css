@@ -14,14 +14,16 @@ code {
 }
 
 blockquote {
-  margin: 0 auto;
+  margin: 0 1em;
 
-  color: rgba(0, 0, 0, 0.6);
+  font-weight: bold;
+  color: rgba(0, 0, 0, 0.67);
 }
 
 blockquote.math {
   color: rgba(0, 0, 0, 0.84);
 
+  font-weight: normal;
   font-size: 120%;
   text-align: center;
   font-family: 'Source Serif Pro', serif;

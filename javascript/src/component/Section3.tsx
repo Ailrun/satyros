@@ -18,14 +18,14 @@ const Section3: React.FunctionComponent = () => {
       </ul>
       <p className='indent'>We will show these two approaches in turn, and describe how they are different with the following <a href='https://en.wikipedia.org/wiki/Job-shop_scheduling'>job-shop scheduling problem</a>:</p>
       <blockquote>
-    We have two manufacturing machines <var>A</var> and <var>B</var>, each of which can perform one task at a time.<br/>
-        Also, there are three people <var>X</var>, <var>Y</var> want to make there products, and each product requires lanes of machines in different orders for different time periods.<br/>
+        We have two manufacturing machines <var>A</var> and <var>B</var>, each of which can perform one task at a time.<br/>
+        Also, there are three people <var>X</var>, <var>Y</var>, and <var>Z</var> want to make their products, and each product requires lanes of machines in different orders for different time periods.<br/>
         <ul>
           <li>The product of <var>X</var> requires <var>A</var> for 5 hours, then <var>B</var> for 2 hours.</li>
           <li>The product of <var>Y</var> requires <var>B</var> for 1 hours, then <var>A</var> for 4 hours.</li>
           <li>The product of <var>Z</var> requires <var>A</var> for 4 hours.</li>
         </ul>
-        Is there a time schedule in which all of them get their product within 13 hours?
+        Is there a time schedule in which all of them can get their product within 13 hours?
       </blockquote>
       <p>We need to encode this into a QFIDL SMT problem first. Since there are 5 required tasks and each needs a variable for the task start time, we will use 5 variables:</p>
       <blockquote className='math'>
@@ -41,15 +41,15 @@ const Section3: React.FunctionComponent = () => {
       </blockquote>
       <p>Each task should start after schedule begins and finish before the deadline.</p>
       <blockquote className='math'>
-        <var>x<sub>1</sub></var> ≥ 0 ∧ <var>x<sub>1</sub></var> ≤ {13 - 5}
+        <var>x<sub>1</sub></var> ≥ 0 ∧ <var>x<sub>1</sub></var> ≤ 13 - 5 = {13 - 5}
         <br />
-        <var>x<sub>2</sub></var> ≥ 0 ∧ <var>x<sub>2</sub></var> ≤ {13 - 2}
+        <var>x<sub>2</sub></var> ≥ 0 ∧ <var>x<sub>2</sub></var> ≤ 13 - 2 = {13 - 2}
         <br />
-        <var>x<sub>3</sub></var> ≥ 0 ∧ <var>x<sub>3</sub></var> ≤ {13 - 1}
+        <var>x<sub>3</sub></var> ≥ 0 ∧ <var>x<sub>3</sub></var> ≤ 13 - 1 = {13 - 1}
         <br />
-        <var>x<sub>4</sub></var> ≥ 0 ∧ <var>x<sub>4</sub></var> ≤ {13 - 4}
+        <var>x<sub>4</sub></var> ≥ 0 ∧ <var>x<sub>4</sub></var> ≤ 13 - 4 = {13 - 4}
         <br />
-        <var>x<sub>5</sub></var> ≥ 0 ∧ <var>x<sub>5</sub></var> ≤ {13 - 4}
+        <var>x<sub>5</sub></var> ≥ 0 ∧ <var>x<sub>5</sub></var> ≤ 13 - 4 = {13 - 4}
       </blockquote>
       <p>Now, we need to encode that no machine can execute two task at once. For any task using machine <var>A</var>, no task using <var>A</var> is not overwrapped with the task, and likewise for the tasks using machine <var>B</var>.</p>
       <blockquote className='math'>
