@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/satyros/static/css/main.55fe4bb6.chunk.css",
-    "main.js": "/satyros/static/js/main.0b82fb68.chunk.js",
-    "main.js.map": "/satyros/static/js/main.0b82fb68.chunk.js.map",
+    "main.css": "/satyros/static/css/main.6096e018.chunk.css",
+    "main.js": "/satyros/static/js/main.b610d03d.chunk.js",
+    "main.js.map": "/satyros/static/js/main.b610d03d.chunk.js.map",
     "runtime-main.js": "/satyros/static/js/runtime-main.11d67514.js",
     "runtime-main.js.map": "/satyros/static/js/runtime-main.11d67514.js.map",
     "static/js/2.9536aeb8.chunk.js": "/satyros/static/js/2.9536aeb8.chunk.js",
@@ -10,13 +10,13 @@
     "static/js/3.16451486.chunk.js": "/satyros/static/js/3.16451486.chunk.js",
     "static/js/3.16451486.chunk.js.map": "/satyros/static/js/3.16451486.chunk.js.map",
     "index.html": "/satyros/index.html",
-    "static/css/main.55fe4bb6.chunk.css.map": "/satyros/static/css/main.55fe4bb6.chunk.css.map",
+    "static/css/main.6096e018.chunk.css.map": "/satyros/static/css/main.6096e018.chunk.css.map",
     "static/js/2.9536aeb8.chunk.js.LICENSE.txt": "/satyros/static/js/2.9536aeb8.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.11d67514.js",
     "static/js/2.9536aeb8.chunk.js",
-    "static/css/main.55fe4bb6.chunk.css",
-    "static/js/main.0b82fb68.chunk.js"
+    "static/css/main.6096e018.chunk.css",
+    "static/js/main.b610d03d.chunk.js"
   ]
 }
