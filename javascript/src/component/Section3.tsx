@@ -82,7 +82,7 @@ const Section3: React.FunctionComponent = () => {
         <h3>More clever approach: one into the other</h3>
         <p>We start with the SAT solver as before. However, after propagating boolean constraints for a single decision level, we immediately executes QFIDL solver with that partial assignment to check whether the decision is acceptable from the QFIDL{'\''}s viewpoint.</p>
         <Example9 />
-        <p>Although this is a small example and it is inaccurate to compare these approaches in this way, but this approach requires only one backtrace. More important point is, each backtrace is more local (since a conflict is at the same decision level) and thus less expensive in terms of backtracking cost.</p>
+      <p>This approach also requires two backtracks. Does that mean these two approaches are equivalent? No! note that each backtrace is more local (since a conflict is at the same decision level) and thus less expensive in terms of backtracking cost. For bigger example with more variables, this cost different becomes more eminent and makes this approach more preferable.</p>
       </section>
     </section>
   );

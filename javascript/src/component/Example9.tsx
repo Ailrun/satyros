@@ -314,6 +314,34 @@ const Example9: React.FunctionComponent = () => {
             satyrosAPI1!.step(cb);
           },
           {
+            BCPConflictDrivenClause() {
+              updateState();
+            },
+          },
+        ));
+        break;
+      case 1062:
+        setStage(s => s + 1);
+        satyrosAPI1!.step(stepsExcept(
+          cb => {
+            setStage(s => s + 1);
+            satyrosAPI1!.step(cb);
+          },
+          {
+            BacktraceComplete() {
+              updateState();
+            },
+          },
+        ));
+        break;
+      case 1063:
+        setStage(s => s + 1);
+        satyrosAPI1!.step(stepsExcept(
+          cb => {
+            setStage(s => s + 1);
+            satyrosAPI1!.step(cb);
+          },
+          {
             DecisionComplete() {
               updateState();
             },
@@ -326,7 +354,7 @@ const Example9: React.FunctionComponent = () => {
     }
   }, [satyrosAPI1, stage, updateState]);
   const undo = React.useCallback(() => {
-    const stages = [0, 1, 2, 111, 114, 230, 232, 355, 486, 487, 620, 621, 622, 623, 752, 892, 1202];
+    const stages = [0, 1, 2, 111, 114, 230, 232, 355, 486, 487, 620, 621, 622, 623, 752, 892, 1062, 1063, 1202];
     const stageIndex = stages.indexOf(stage);
     let localCounter = stages[stageIndex] - stages[stageIndex - 1];
     setStage(s => s - 1);
@@ -373,6 +401,8 @@ const Example9: React.FunctionComponent = () => {
       case 623: return <Fragment>So we run QFIDL solver…</Fragment>;
       case 752: return <Fragment>And yes, it is safe!</Fragment>;
       case 892: return <Fragment>SAT decides once more, <FalseText><var>b5</var> (false)</FalseText>, which implies <TrueText><var>b6</var> (true)</TrueText>, and we still don{'\''}t have any negative cycle.</Fragment>;
+      case 1062: return <Fragment>SAT tries <TrueText><var>b4</var> (true)</TrueText>, but it has a negative cycle</Fragment>;
+      case 1063: return <Fragment>Thus it learns one more clause: ¬<var>b4</var> ∨ ¬<var>b3</var> and backtracks</Fragment>;
       case 1202: return <Fragment>By setting <FalseText><var>b4</var> (false)</FalseText>, the decision process over, and we checked there{'\''}s no negative cycle. This gives us final assignment: <var>x1</var> = 4, <var>x2</var> = 0, <var>x3</var> = 2, <var>x4</var> = 9, <var>x5</var> = 0.</Fragment>;
       default: return 'NYI...';
     }
