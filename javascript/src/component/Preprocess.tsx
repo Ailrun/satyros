@@ -36,7 +36,7 @@ const Preprocess: React.FunctionComponent<Props> = ({ underSAT }) => {
             <option label='x₁ - x₂ ≤ r' value='2::<=?' />
             <option label='x₁ - x₂ < r' value='2::<?' />
             <option label='x₁ - x₂ ≥ r' value='2::>=?' />
-            <option label='x₁ - x₂ > r' value='2::>=?' />
+            <option label='x₁ - x₂ > r' value='2::>?' />
             { underSAT ? (
                 <Fragment>
                   <option label='x₁ - x₂ = r' value='2::=?' />
@@ -47,7 +47,7 @@ const Preprocess: React.FunctionComponent<Props> = ({ underSAT }) => {
             <option label='x₁ ≤ r' value='1::<=?' />
             <option label='x₁ < r' value='1::<?' />
             <option label='x₁ ≥ r' value='1::>=?' />
-            <option label='x₁ > r' value='1::>=?' />
+            <option label='x₁ > r' value='1::>?' />
             { underSAT ? (
                 <Fragment>
                   <option label='x₁ = r' value='1::=?' />
