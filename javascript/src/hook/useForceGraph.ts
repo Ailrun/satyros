@@ -35,7 +35,7 @@ export const useForceGraph = <N extends d3.SimulationNodeDatum, L extends d3.Sim
   const simulation = d3.forceSimulation<N, L>()
     .force('collide', d3.forceCollide(radius))
     .force('charge', d3.forceManyBody().strength(-1000).theta(0.5))
-    .force('link', d3.forceLink<N, L>().id(d => nodeId(d)).strength(l => linkDistance(l) * 0.01).distance(linkDistance))
+    .force('link', d3.forceLink<N, L>().id(d => nodeId(d)).strength(0.01).distance(linkDistance))
     .force('x', d3.forceX())
     .force('y', d3.forceY())
     .force('limits', d3ForceLimit().radius(5 * radius).x0(- width / 2).x1(width / 2).y0(- height / 2).y1(height / 2).cushionWidth(10 * radius).cushionStrength(1))

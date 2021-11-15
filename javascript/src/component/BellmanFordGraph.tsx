@@ -8,6 +8,7 @@ interface Props {
   readonly height: number;
   readonly nodes: SatyrosBellmanFordVertex[];
   readonly links: SatyrosBellmanFordEdge[];
+  readonly hideMin: boolean;
 }
 
 interface SimulationNode extends d3.SimulationNodeDatum {
@@ -22,30 +23,38 @@ interface SimulationLink extends d3.SimulationLinkDatum<SimulationNode> {
 }
 
 export const BellmanFordGraph: React.FunctionComponent<Props> = ({
-  width, height, nodes, links
+  width, height, nodes, links, hideMin
 }) => {
   const ref = React.useRef<SVGSVGElement>(null);
 
-  const simulationNodes = React.useMemo(() => {
-    return nodes.map(({
-      variable, distance,
-    }): SimulationNode => ({
-      id: variable ?? -1,
-      distance,
-    }));
-  }, [nodes]);
+  const simulationNodes = React.useMemo(
+    () =>
+      nodes
+        .filter(({ variable }) => typeof variable === 'number' || !hideMin)
+        .map(
+          ({ variable, distance }): SimulationNode => ({
+            id: variable ?? -1,
+            distance,
+          })
+        ),
+    [nodes, hideMin],
+  );
 
-  const simulationLinks = React.useMemo(() => {
-    return links.map(({
-      startVertex, endVertex, weight, lastActive,
-    }): SimulationLink => ({
-      id: `${startVertex ?? -1},${endVertex ?? -1}`,
-      source: startVertex ?? -1,
-      target: endVertex ?? -1,
-      weight,
-      lastActive,
-    }));
-  }, [links]);
+  const simulationLinks = React.useMemo(
+    () =>
+      links
+        .filter(({ startVertex }) => typeof startVertex === 'number' || !hideMin)
+        .map(
+          ({ startVertex, endVertex, weight, lastActive }): SimulationLink => ({
+            id: `${startVertex ?? -1},${endVertex ?? -1}`,
+            source: startVertex ?? -1,
+            target: endVertex ?? -1,
+            weight,
+            lastActive,
+          })
+        ),
+    [links, hideMin],
+  );
 
   useForceGraph({
     id: 'bellman-ford',

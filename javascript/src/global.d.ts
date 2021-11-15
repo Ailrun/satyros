@@ -13,6 +13,7 @@ declare global {
   type FormulaLike<T> = ClauseLike<T>[];
 
   interface SatyrosAPI {
+    readonly initialFormula: Formula;
     readonly expressedFormula: FormulaLike<Expressed>;
     readonly conversionTable: SatyrosConversionTable;
     readonly getFormula(callback: (f: Formula) => void): void;
@@ -76,12 +77,15 @@ declare global {
   }
 
   interface SatyrosAssignmentAPI {
+    readonly getValueMapList(callback: (as: [number, [boolean, Clause]][]) => void): void;
     readonly getValue(x: number, callback: (a: [boolean, Clause] | null) => void): void;
+    readonly getValueOfClauseMapList(callback: (vs: [number, boolean | null][]) => void): void;
     readonly getValueOfClause(i: number, callback: (v: boolean | null) => void): void;
     readonly getValueOfFormula(callback: (v: boolean | null) => void): void;
   }
 
   interface Window {
     readonly makeSatyrosAPI: (f: FormulaLike<Expressible>) => SatyrosAPI;
+    readonly makeSatyrosAPI1: (f: FormulaLike<Expressible>) => SatyrosAPI;
   }
 }

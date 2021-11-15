@@ -9,30 +9,32 @@ interface Props {
   conversionTable: SatyrosConversionTable;
   assignmentAPI: SatyrosAssignmentAPI;
   update: number;
+  onClick?(d: [number, [Expressed, number][]]): void;
 }
 
 const ConversionTable: React.FunctionComponent<Props> = ({
-  width, height, conversionTable, assignmentAPI, update,
+  width, height, conversionTable, assignmentAPI, update, onClick
 }) => {
+  const variableMap = React.useMemo(() => new Map(haskellCallWrapper(assignmentAPI.getValueMapList)[0]), [assignmentAPI, update]);
   const ref = React.useRef<SVGSVGElement>(null);
   const textFill = React.useCallback((v) => d3.schemeSet2[v === undefined ? 7 : v ? 0 : 1], []);
   const textShadeFill = React.useCallback((v) => d3.schemePastel2[v === undefined ? 7 : v ? 0 : 1], []);
   const variableFill = React.useCallback(d => {
-    const v = haskellCallWrapper<[[boolean, Clause] | null]>(cb => assignmentAPI.getValue(d[0], cb))[0];
+    const v = variableMap.get(d[0]);
     return textFill(v?.[0]);
-  }, [textFill, assignmentAPI]);
+  }, [textFill, variableMap]);
   const variableShadeFill = React.useCallback(d => {
-    const v = haskellCallWrapper<[[boolean, Clause] | null]>(cb => assignmentAPI.getValue(d[0], cb))[0];
+    const v = variableMap.get(d[0]);
     return textShadeFill(v?.[0]);
-  }, [textShadeFill, assignmentAPI]);
+  }, [textShadeFill, variableMap]);
   const expressedFill = React.useCallback(d => {
-    const v = haskellCallWrapper<[[boolean, Clause] | null]>(cb => assignmentAPI.getValue(Math.abs(d[1]), cb))[0];
-    return textFill(v === null || v[0] === (d[1] < 0) ? undefined : v[0]);
-  }, [textFill, assignmentAPI]);
+    const v = variableMap.get(Math.abs(d[1]));
+    return textFill(v === undefined || v[0] === (d[1] < 0) ? undefined : v[0]);
+  }, [textFill, variableMap]);
   const expressedShadeFill = React.useCallback(d => {
-    const v = haskellCallWrapper<[[boolean, Clause] | null]>(cb => assignmentAPI.getValue(Math.abs(d[1]), cb))[0];
-    return textShadeFill(v === null || v[0] === (d[1] < 0) ? undefined : v[0]);
-  }, [textShadeFill, assignmentAPI]);
+    const v = variableMap.get(Math.abs(d[1]));
+    return textShadeFill(v === undefined || v[0] === (d[1] < 0) ? undefined : v[0]);
+  }, [textShadeFill, variableMap]);
 
   React.useEffect(() => {
     const svg = d3.select(ref.current);
@@ -66,6 +68,9 @@ const ConversionTable: React.FunctionComponent<Props> = ({
 
           g.append('text')
             .classed('conversion-variable', true)
+            .on('click', (_e, d) => {
+              onClick?.(d);
+            })
             .text(d => `b${d[0]}`)
             .attr('text-anchor', 'start')
             .attr('y', 30)
@@ -75,7 +80,7 @@ const ConversionTable: React.FunctionComponent<Props> = ({
             .clone(true).lower()
             .classed('conversion-variable', false)
             .classed('conversion-variable-shade', true)
-            .attr('stroke-width', 3)
+            .attr('stroke-width', 2)
             .attr('fill', variableShadeFill)
             .attr('stroke', variableShadeFill);
 
@@ -93,7 +98,7 @@ const ConversionTable: React.FunctionComponent<Props> = ({
           return update;
         },
       )
-      .attr('transform', (_d, i) => `translate(0, ${i * 80})`);
+      .attr('transform', (_d, i) => `translate(${(i % 3) * 160}, ${(i / 3 | 0) * 80})`);
 
     content.selectChildren<SVGGElement, [number, [Expressed, number][]]>('g')
       .selectChildren<SVGGElement, [Expressed, number]>('g.conversion-expressed')
@@ -113,7 +118,7 @@ const ConversionTable: React.FunctionComponent<Props> = ({
             .clone(true).lower()
             .classed('conversion-expressed-text', false)
             .classed('conversion-expressed-text-shade', true)
-            .attr('stroke-width', 3)
+            .attr('stroke-width', 2)
             .attr('stroke', expressedShadeFill)
             .attr('fill', expressedShadeFill);
 
@@ -139,7 +144,7 @@ const ConversionTable: React.FunctionComponent<Props> = ({
       .attr('y', (bbox?.y ?? - 1) + 1)
       .attr('width', (bbox?.width ?? -18) + 18)
       .attr('height', (bbox?.height ?? -18) + 18);
-  }, [variableFill, variableShadeFill, expressedFill, expressedShadeFill, conversionTable, assignmentAPI, update]);
+  }, [variableFill, variableShadeFill, expressedFill, expressedShadeFill, conversionTable, update, onClick]);
 
   React.useEffect(() => {
     const svg = d3.select(ref.current);

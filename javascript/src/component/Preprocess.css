@@ -1,7 +1,8 @@
 .Preprocess {
-  margin: 2em auto;
+  margin: 1em auto;
 
-  width: 640px;
+  box-sizing: border-box;
+  width: calc(100% - 2em);
 
   text-align: center;
   text-indent: 0;
@@ -14,7 +15,7 @@
 
 .Preprocess .expression-picker select {
   margin-left: 1em;
-  margin-right: 4em;
+  margin-right: 2em;
 }
 
 .Preprocess .expression-picker div {

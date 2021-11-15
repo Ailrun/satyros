@@ -109,11 +109,12 @@ export const expressedFormulaToString = (expressedFormula: FormulaLike<Expressed
   return expressedFormula.map(v => v.map(e => expressedToString(e)).join(' ∨ ')).join(' ∧ ');
 };
 
-export const expressedFormulaToFragment = (expressedFormula: FormulaLike<Expressed>): React.ReactNode => {
+export const expressedFormulaToFragment = (expressedFormula: FormulaLike<Expressed>, linefeed: boolean = false): React.ReactNode => {
   return expressedFormula.map(
     (expressedClause, i) => (
       <Fragment key={i}>
         {i === 0 ? null : ' ∧ '}
+        {expressedFormula.length > 1 && expressedClause.length > 1 ? '(' : null}
         {
           expressedClause.map(
             (expressed, i) => (
@@ -124,6 +125,8 @@ export const expressedFormulaToFragment = (expressedFormula: FormulaLike<Express
             )
           )
         }
+        {expressedFormula.length > 1 && expressedClause.length > 1 ? ')' : null}
+        {linefeed ? <br /> : null}
       </Fragment>
     ),
   );

@@ -9,23 +9,23 @@ const Section2: React.FunctionComponent = () => {
   return (
     <section className='Section Section2'>
       <h2>Your Focus Determines Your Reality… or Your Solvers</h2>
-      <p><span className='initial'>I</span>t is often tedious to encode a problem entirely in boolean logic, and sometimes there is even a domain-specific solvers that is much more efficient than SAT solvers for some parts of your problem, in which case paying SAT encoding cost and introducing NP-complete procedure for the part can slow down the solution search process significantly. This is why many applications of SAT solver often uses Satisfiability "Modulo Theory" (referred as "SMT" below) solvers instead. In this article, we introduce a Quantifier-free integer difference logic ("QFIDL") and its solver shortly, and describes the details of the integration of such "external" solvers with SAT solvers.</p>
+      <p><span className='initial'>I</span>t is often tedious to encode a problem entirely in boolean logic, and sometimes there is even a domain-specific solver that is much more efficient than SAT solvers for some parts of your problem, in which case paying SAT encoding cost and introducing NP-complete procedure for the parts can slow down the solution search process significantly. This is why many applications of SAT solvers often use Satisfiability "Modulo Theory" (referred as "SMT" below) solvers instead. In this article, we introduce the Quantifier-free Integer Difference Logic ("QFIDL") and its solver shortly, and describe the details of the integration of such "external" solvers with SAT solvers.</p>
       <section className='Subsection Subsection2-1'>
         <h3>Quantifier Free Integer Difference Logic (QFIDL)</h3>
         <p>
-          QFIDL is a system that can solves the following question:
+          QFIDL is a system that can solve the following question:
         </p>
         <blockquote>
-          Suppose that we have integer variables: <var>x<sub>1</sub></var>, <var>x<sub>2</sub></var>, …, <var>x<sub>n</sub></var> and their constraints in a form of <var>x<sub>i</sub></var> - <var>x<sub>j</sub></var> <var>{'['}op{']'}</var> <var>c</var> or <var>x<sub>i</sub></var> <var>{'['}op{']'}</var> <var>c</var>, where <var>c</var> is a real number constant and <var>{'['}op{']'}</var> is one of <var>{'<'}</var>, <var>{'≤'}</var>, <var>{'>'}</var>, <var>{'≥'}</var>. Will there be an assignment for these integer variables so that they satisfies all the given constraints?
+          Suppose that we have integer variables: <var>x<sub>1</sub></var>, <var>x<sub>2</sub></var>, …, <var>x<sub>n</sub></var> and their constraints in a form of <var>x<sub>i</sub></var> - <var>x<sub>j</sub></var> <var>{'['}op{']'}</var> <var>c</var> or <var>x<sub>i</sub></var> <var>{'['}op{']'}</var> <var>c</var>, where <var>c</var> is a real number constant and <var>{'['}op{']'}</var> is one of <var>{'<'}</var>, <var>{'≤'}</var>, <var>{'>'}</var>, <var>{'≥'}</var>. Will there be an assignment for these integer variables so that they satisfy all the given constraints?
         </blockquote>
         <p className='indent'>
           Actually, we can encode these constraints in an even simpler form:
         </p>
         <blockquote>
-          Suppose that we have integer variables: <var>x<sub>1</sub></var>, <var>x<sub>2</sub></var>, …, <var>x<sub>n</sub></var> and their constraints in a form of <var>x<sub>i</sub></var> - <var>x<sub>j</sub></var> <var>≤</var> <var>c</var>, where <var>c</var> is an integer number constant. Will there be an assignment for these integer variables so that they satisfies all the given constraints?
+          Suppose that we have integer variables: <var>x<sub>1</sub></var>, <var>x<sub>2</sub></var>, …, <var>x<sub>n</sub></var> and their constraints in a form of <var>x<sub>i</sub></var> - <var>x<sub>j</sub></var> <var>≤</var> <var>c</var>, where <var>c</var> is an integer number constant. Will there be an assignment for these integer variables so that they satisfy all the given constraints?
         </blockquote>
         <p>
-          Here, we removed the constraints only with one variable, restrict <var>c</var> to be an integer, and limits the operator to the "less than or equal to" operator. This form is what QFIDL really solves internally.
+          Here, we removed the constraints only with one variable, restrict <var>c</var> to be an integer, and limit the operator to the "less than or equal to" operator. This form is what QFIDL really solves internally.
         </p>
         <p className='indent'>
           How this simplification is possible? Let{'\''}s check it in its graphical form:
@@ -35,7 +35,7 @@ const Section2: React.FunctionComponent = () => {
           As you may have noticed, the area that covered by simplified form is not exactly the same. However, since the variables are actually <em>integer</em> variables, we need to focus on integer lattice points covered by those areas, which faithfully agree with each other.
         </p>
         <p className='indent'>
-          One thing worth noting that is how we removed one variable constraints. We introduce an auxiliary variable <var>z</var> representing 0, make one variable constraints to two variable constraints with <var>z</var>. We can add this auxiliary variable as (simple version of) QFIDL always works on a difference of two variables. Thus, once we have an satisfying assignment for integer variables, we can add or substract the same amount from all variables to get another satisfying assignment. By adjusting the assigned value for <var>z</var> to be 0, we can derive a solution for "complex" form of constraints.
+          One thing worth noting is how we removed one variable constraints. We introduce an auxiliary variable <var>z</var> representing 0, make one variable constraints to two variable constraints with <var>z</var>. We can add this auxiliary variable because (the simple version of) QFIDL always works on a difference of two variables. Thus, once we have an satisfying assignment for the integer variables, we can add or substract the same amount from all variables to get another satisfying assignment. By adjusting the assigned value for <var>z</var> to be 0, we can derive a solution for "complex" form of constraints.
         </p>
         <p className='indent'>
           When we use QFIDL alongside SAT solver, we have conjunctions and disjunctions. This allow us to encode more operators. In the above problem, we can change the list of <var>{'['}op{']'}</var> into:
@@ -51,7 +51,7 @@ const Section2: React.FunctionComponent = () => {
       <section className='Subsection Subsection2-2'>
         <h3>QFIDL Solver</h3>
         <p>
-          How can we solve QFIDL problems? Suppose that we have
+          How can we solve a QFIDL problem? Suppose that we have
         </p>
         <blockquote className='math'>
           <var>x<sub>1</sub></var> - <var>x<sub>2</sub></var> ≤ 4

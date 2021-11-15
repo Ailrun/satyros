@@ -176,6 +176,7 @@ const Example1: React.FunctionComponent = () => {
           height={400}
           nodes={bellmanFordNodes}
           links={bellmanFordLinks}
+          hideMin={false}
         />
         <br />
         <ClauseDB

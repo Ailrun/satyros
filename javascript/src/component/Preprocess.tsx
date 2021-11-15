@@ -76,8 +76,8 @@ const Preprocess: React.FunctionComponent<Props> = ({ underSAT }) => {
         <span className={processed ? '' : 'invisible'}>Processed Expression: {expressedFormulaToFragment(expressibleToExpressedFormula(expressible))}</span>
       </div>
       <PreprocessGraph
-        width={640}
-        height={400}
+        width={520}
+        height={360}
         processed={processed}
         expressible={expressible}
       />

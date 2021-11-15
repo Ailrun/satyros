@@ -146,16 +146,17 @@ const Example2: React.FunctionComponent = () => {
     return null;
   } else {
     return (
-      <div style={{ display: 'block', width: 640, margin: '0 auto' }}>
+      <div style={{ display: 'block', width: 560, margin: '0 auto' }}>
         <button disabled={stage === 0} onClick={reset}>Reset</button>
         <button disabled={stage === 0} onClick={undo}>{'<'} Undo</button>
         <button disabled={stage === 23} onClick={step}>Step {'>'}</button>
         <br />
         <BellmanFordGraph
-          width={640}
+          width={560}
           height={400}
           nodes={bellmanFordNodes}
           links={bellmanFordLinks}
+          hideMin={false}
         />
       </div>
     );

@@ -14,6 +14,8 @@ interface Props {
 const ClauseDB: React.FunctionComponent<Props> = ({
   width, height, formula, assignmentAPI, update,
 }) => {
+  const variableMap = React.useMemo(() => new Map(haskellCallWrapper(assignmentAPI.getValueMapList)[0]), [assignmentAPI, update]);
+  const clauseMap = React.useMemo(() =>  new Map(haskellCallWrapper(assignmentAPI.getValueOfClauseMapList)[0]), [assignmentAPI, update]);
   const ref = React.useRef<SVGSVGElement>(null);
   const textFill = React.useCallback((v) => d3.schemeSet2[v === undefined ? 7 : v ? 0 : 1], []);
   const textShadeFill = React.useCallback((v) => d3.schemePastel2[v === undefined ? 7 : v ? 0 : 1], []);
@@ -21,31 +23,31 @@ const ClauseDB: React.FunctionComponent<Props> = ({
     if (typeof d === 'string') {
       return textFill(undefined);
     }
-    const v = haskellCallWrapper<[[boolean, Clause] | null]>(cb => assignmentAPI.getValue(Math.abs(d), cb))[0];
-    return textFill(v === null ? undefined : (v[0] === (d > 0)));
-  }, [textFill, assignmentAPI]);
+    const v = variableMap.get(Math.abs(d));
+    return textFill(v === undefined ? undefined : (v[0] === (d > 0)));
+  }, [textFill, variableMap]);
   const literalShadeFill = React.useCallback(d => {
     if (typeof d === 'string') {
       return textShadeFill(undefined);
     }
-    const v = haskellCallWrapper<[[boolean, Clause] | null]>(cb => assignmentAPI.getValue(Math.abs(d), cb))[0];
-    return textShadeFill(v === null ? undefined : (v[0] === (d > 0)));
-  }, [textShadeFill, assignmentAPI]);
+    const v = variableMap.get(Math.abs(d));
+    return textShadeFill(v === undefined ? undefined : (v[0] === (d > 0)));
+  }, [textShadeFill, variableMap]);
   const clauseFill = React.useCallback((_d, i) => {
-    const v = haskellCallWrapper<[boolean | null]>(cb => assignmentAPI.getValueOfClause(i, cb))[0];
-    return textFill(v === null ? undefined : v);
-  }, [textFill, assignmentAPI]);
+    const v = clauseMap.get(i);
+    return textFill(v ?? undefined);
+  }, [textFill, clauseMap]);
   const clauseShadeFill = React.useCallback((_d, i) => {
-    const v = haskellCallWrapper<[boolean | null]>(cb => assignmentAPI.getValueOfClause(i, cb))[0];
-    return textShadeFill(v === null ? undefined : v);
-  }, [textShadeFill, assignmentAPI]);
+    const v = clauseMap.get(i);
+    return textShadeFill(v ?? undefined);
+  }, [textShadeFill, clauseMap]);
   const formulaFill = React.useCallback(() => {
     const v = haskellCallWrapper<[boolean | null]>(cb => assignmentAPI.getValueOfFormula(cb))[0];
-    return textFill(v === null ? undefined : v);
+    return textFill(v ?? undefined);
   }, [textFill, assignmentAPI]);
   const formulaShadeFill = React.useCallback(() => {
     const v = haskellCallWrapper<[boolean | null]>(cb => assignmentAPI.getValueOfFormula(cb))[0];
-    return textShadeFill(v === null ? undefined : v);
+    return textShadeFill(v ?? undefined);
   }, [textShadeFill, assignmentAPI]);
 
   React.useEffect(() => {
@@ -75,7 +77,7 @@ const ClauseDB: React.FunctionComponent<Props> = ({
     const content = g.select<SVGGElement>('g');
 
     content.selectChildren('text.clause-db-formula')
-      .data([false])
+      .data([0])
       .join(
         enter => {
           const g = enter.append('g')
