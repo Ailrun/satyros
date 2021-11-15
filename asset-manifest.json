@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/satyros/static/css/main.55fe4bb6.chunk.css",
-    "main.js": "/satyros/static/js/main.2ccfcc0a.chunk.js",
-    "main.js.map": "/satyros/static/js/main.2ccfcc0a.chunk.js.map",
+    "main.js": "/satyros/static/js/main.6f938bd6.chunk.js",
+    "main.js.map": "/satyros/static/js/main.6f938bd6.chunk.js.map",
     "runtime-main.js": "/satyros/static/js/runtime-main.11d67514.js",
     "runtime-main.js.map": "/satyros/static/js/runtime-main.11d67514.js.map",
     "static/js/2.9536aeb8.chunk.js": "/satyros/static/js/2.9536aeb8.chunk.js",
@@ -17,6 +17,6 @@
     "static/js/runtime-main.11d67514.js",
     "static/js/2.9536aeb8.chunk.js",
     "static/css/main.55fe4bb6.chunk.css",
-    "static/js/main.2ccfcc0a.chunk.js"
+    "static/js/main.6f938bd6.chunk.js"
   ]
 }
