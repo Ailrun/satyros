@@ -19,10 +19,10 @@ const Section3: React.FunctionComponent = () => {
       <p className='indent'>We will show these two approaches in turn, and describe how they are different with the following <a href='https://en.wikipedia.org/wiki/Job-shop_scheduling'>job-shop scheduling problem</a>:</p>
       <blockquote>
         We have two manufacturing machines <var>A</var> and <var>B</var>, each of which can perform one task at a time.<br/>
-        Also, there are three people <var>X</var>, <var>Y</var>, and <var>Z</var> want to make their products, and each product requires lanes of machines in different orders for different time periods.<br/>
+        Also, there are three people <var>X</var>, <var>Y</var>, and <var>Z</var> want to make their products, and each product requires lanes of machines for different time periods.<br/>
         <ul>
-          <li>The product of <var>X</var> requires <var>A</var> for 5 hours, then <var>B</var> for 2 hours.</li>
-          <li>The product of <var>Y</var> requires <var>B</var> for 1 hours, then <var>A</var> for 4 hours.</li>
+          <li>The product of <var>X</var> requires <var>A</var> for 5 hours and <var>B</var> for 2 hours.</li>
+          <li>The product of <var>Y</var> requires <var>B</var> for 1 hours and <var>A</var> for 4 hours.</li>
           <li>The product of <var>Z</var> requires <var>A</var> for 4 hours.</li>
         </ul>
         Is there a time schedule in which all of them can get their product within 13 hours?
