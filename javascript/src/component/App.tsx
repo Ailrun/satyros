@@ -3,6 +3,7 @@ import React from 'react';
 import Section1 from './Section1';
 import Section2 from './Section2';
 import Section3 from './Section3';
+import Section4 from './Section4';
 import References from './References';
 
 import './App.css';
@@ -22,6 +23,8 @@ const App: React.FunctionComponent = () => {
         <Section2 />
         <hr />
         <Section3 />
+        <hr />
+        <Section4 />
       </body>
       <hr />
       <footer>
