@@ -74,9 +74,9 @@ const Example7: React.FunctionComponent = () => {
             update={0}
           />
         </div>
-        <div style={{ display: 'block', width: 460, margin: '0 auto' }}>
+        <div style={{ display: 'block', width: 462, margin: '0 auto' }}>
           <ConversionTable
-            width={460}
+            width={462}
             height={500}
             conversionTable={satyrosAPI.conversionTable}
             assignmentAPI={satyrosAPI.assignment}

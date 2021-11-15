@@ -91,10 +91,10 @@ const Example6: React.FunctionComponent = () => {
     return null;
   } else {
     return (
-      <div style={{ display: 'block', width: 460, margin: '0 auto' }}>
+      <div style={{ display: 'block', width: 462, margin: '0 auto' }}>
         <div style={{ display: 'block', padding: '3px', border: 'solid 1px', borderColor: d3.schemeAccent[7], textAlign: 'center' }}><span style={{ color: d3.schemeSet2[7], margin: '0 1em' }}>Unassigned</span> <span style={{ color: d3.schemeSet2[0], margin: '0 1em' }}>True</span> <span style={{ color: d3.schemeSet2[1], margin: '0 1em' }}>False</span></div>
         <ConversionTable
-          width={460}
+          width={462}
           height={500}
           conversionTable={satyrosAPI.conversionTable}
           assignmentAPI={pseudoAssignmentAPI}

@@ -412,9 +412,9 @@ const Example9: React.FunctionComponent = () => {
             assignmentAPI={satyrosAPI1.assignment}
             update={fVersion}
           />
-          <div style={{ width: 460, float: 'right' }}>
+          <div style={{ width: 462, float: 'right' }}>
             <ConversionTable
-              width={460}
+              width={462}
               height={600}
               conversionTable={conversion!}
               assignmentAPI={satyrosAPI1.assignment}
