@@ -10,15 +10,23 @@ import './App.css';
 const App: React.FunctionComponent = () => {
   return (
     <article className='App' lang='en'>
-      <h1>Boolean meets Theories: SMT Solvers</h1>
+      <header>
+        <h1>Boolean meets Theories: SMT Solvers</h1>
+        <h3 style={{ marginTop: 0, marginBottom: 0, textAlign: 'right' }}>Junyoung "Clare" Jang</h3>
+        <h4 style={{ marginTop: 0, textAlign: 'right' }}>2021/11/15</h4>
+      </header>
       <hr />
-      <Section1 />
+      <body>
+        <Section1 />
+        <hr />
+        <Section2 />
+        <hr />
+        <Section3 />
+      </body>
       <hr />
-      <Section2 />
-      <hr />
-      <Section3 />
-      <hr />
-      <References />
+      <footer>
+        <References />
+      </footer>
     </article>
   );
 };
