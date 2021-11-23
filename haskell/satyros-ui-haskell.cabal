@@ -23,6 +23,7 @@ library
     Paths_satyros_ui_haskell
     Satyros.Handler.Clever
     Satyros.Handler.Naive
+    Satyros.Handler.Common
     Satyros.Handler.Type
     Satyros.UI.Util
 
