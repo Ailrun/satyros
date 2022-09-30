@@ -10,18 +10,10 @@
   inputs = {
     haskellNix.url = "github:input-output-hk/haskell.nix";
     nixpkgs.follows = "haskellNix/nixpkgs-unstable";
-    flake-compat = {
-      url = "github:edolstra/flake-compat";
-      flake = false;
-    };
     flake-utils.url = "github:numtide/flake-utils";
-    gitignore = {
-      url = "github:hercules-ci/gitignore.nix";
-      flake = false;
-    };
   };
   outputs =
-    { self, haskellNix, nixpkgs, flake-compat, flake-utils, gitignore }:
+    { self, haskellNix, nixpkgs, flake-utils }:
     flake-utils.lib.eachSystem [ "x86_64-linux" "x86_64-darwin" ] (system:
     let
       overlays = [ haskellNix.overlay
@@ -30,7 +22,7 @@
           satyros-ui-haskell =
             final.haskell-nix.project' {
               src = ./.;
-              compiler-nix-name = "ghc8107";
+              compiler-nix-name = "ghc865";
               shell = {
                 # This is used by `nix develop .` to open a shell for use with
                 # `cabal`, `hlint` and `haskell-language-server`
