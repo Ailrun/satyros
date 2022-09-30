@@ -1,11 +1,13 @@
 module Satyros.Handler.Common where
 
-import           Control.Lens               (Lens', _1, _2, _3, _4, use, (.=))
+import           Control.Lens               (Lens', _1, _2, _3, _4, use, uses,
+                                             view, (%~), (.=))
 import           Control.Monad.State.Strict (runState, state)
 import           Control.Monad.Trans.Free   (hoistFreeT, transFreeT)
 import qualified Data.Map                   as Map
 import qualified Data.Set                   as Set
-import           Satyros.BellmanFord        (BellmanFord, BellmanFordF)
+import           Satyros.BellmanFord        (BellmanFord, BellmanFordF,
+                                             IDLGraph)
 import qualified Satyros.BellmanFord        as BellmanFord
 import qualified Satyros.CNF                as CNF
 import           Satyros.DPLL               (DPLL, DPLLF)
@@ -45,6 +47,14 @@ commonHandler DPLL.BCPComplete = pure False
 commonHandler DPLL.DecisionComplete = pure False
 commonHandler (DPLL.BacktraceComplete _ _) = pure False
 commonHandler (DPLL.InsideDPLL BellmanFord.NegativeCyclePass) = pure False
+
+setBellmanFord :: DPLL InternalStorage BellmanFordF IDLGraph
+setBellmanFord = do
+  m <- use (DPLL.theory . _1)
+  (g, w) <- uses DPLL.assignment $ BellmanFord.initializeStorage . QFIDL.fromAssignment m . fmap (_2 %~ view _1) . Map.toAscList . DPLL.getAssignment
+  DPLL.theory . _2 .= g
+  DPLL.theory . _3 .= w
+  pure g
 
 liftBellmanFord :: Lens' s BellmanFord.Storage -> BellmanFord a -> DPLL s BellmanFordF a
 liftBellmanFord l =
