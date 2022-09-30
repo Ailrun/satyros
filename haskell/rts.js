@@ -3916,7 +3916,6 @@ function h$newByteArray(len) {
          , f3: new Float32Array(buf)
          , f6: new Float64Array(buf)
          , dv: new DataView(buf)
-         , m: 0
          }
 }
 function h$resizeMutableByteArray(a, n) {
@@ -4534,9 +4533,6 @@ function h$follow(obj, sp) {
                     ;
                     for(var i=0;i<s.length;i++) work[w++] = s[i];;
                 }
-            } else if(typeof c.len === 'number' && c.buf instanceof ArrayBuffer) {
-                ;
-                if(typeof c.m === 'number') c.m = (c.m&-4)|mark; else c.m.m = (c.m.m & -4)|mark;;
             } else if(c instanceof h$Weak) {
                 if(typeof c.m === 'number') c.m = (c.m&-4)|mark; else c.m.m = (c.m.m & -4)|mark;;
             } else if(c instanceof h$MVar) {
@@ -6217,12 +6213,7 @@ function h$Weak(key, val, finalizer) {
         ;
         this.keym = new h$StableName(0);
     } else {
-        if(typeof key.m !== 'object') {
-          if(typeof key.m !== 'number') {
-            h$log("attaching weak to unsupported object");
-          }
-          key.m = new h$StableName(key.m);
-        }
+        if(typeof key.m !== 'object') key.m = new h$StableName(key.m);
         this.keym = key.m;
     }
     ;

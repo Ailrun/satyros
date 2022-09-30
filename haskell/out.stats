@@ -1,23 +1,23 @@
 code size summary per package:
 
-base:                    470293
+base:                    469925
 containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG:55069
-extra-1.7.10-d76018cb8518ff171e0305ab0f75838e7c5774558f1e4737d13944e0077e617b:20819
-free-5.1.7-50f1c5e6b8b606f6bd9fd3c7c90726a034516e3e8639ab50e135aa9288f970a0:701
+extra-1.7.12-6cd0d9175117e6448385ce71d3501931d440f3f65e13af68f45544251eb6bb02:21160
+free-5.1.9-273b819981bfcf5abc5e4bcc87d90613372facbd7791be3302320d871e783a83:701
 ghc-prim:                33385
-ghcjs-base-0.2.0.3-80353eb4ced1c08fe2c7663c4be1856e075f868353321e22a68a8d874a25254c:22955
+ghcjs-base-0.2.1.0-d611a058b84ba6b8020d43c251d1ad9b43ecfb93a9ef5265793fd28a12207bc5:22955
 ghcjs-prim-0.1.1.0-EXzjGVHQlAS2XAXcu0iCbS:9027
 integer-gmp:             6323
-jsaddle-0.9.8.0-e6dd9a48f67bab859fa9e582d5dd79b4eaecd43267c3ad403e90864f48d9e695:5256
-lens-5.0.1-580c8f3ef428a94ada2f97c360a212969edb1a483aee41d1c05545dea873cd30:10703
+jsaddle-0.9.8.2-c08a5fc0b08386adea12c5e8675bfdb1082b0b44e2bf92e87225651708530d2b:5256
+lens-5.1.1-032503a8a5c7cbecabc6fcd2132aff10b7ad7109c5515424b72de24e01bc59c9:10703
 main:                    21671
-profunctors-5.6.2-8fd9df0a6dd2c4b8058661b5031cf0f514efd4ebba8ad7169899fe90e7e0ef19:8225
-satyros-0.3.1.4-81c0247269bdf7108186cfae642aa1ae776600b63b70fee7dcbb8e577afd96e2:568112
-satyros-ui-haskell-0.1.0.0-inplace:315062
-semigroupoids-5.3.6-e310043383482ce50129ffb1969464a0a595be1abf415300ca528590db6573b7:9035
-splitmix-0.1.0.4-6a8083cdaee6584130cd1ff7f684480444e3d41ea12790049d706a00f48292f7:280
-transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s:1924
-vector-0.12.3.1-27b167672a6fc314dbc1ab438da26924af6ecb05af35dd9853e6ed8953fd3648:8660
+profunctors-5.6.2-a825919439abbe2f6507e5ad13a147230dad3802e581a7af698e3177e2b38303:8225
+satyros-0.3.1.4-b5902b4cbde38e6ca8244f39ac015484b30bcfa4404bf620ffef55d43d3f2858:495467
+satyros-ui-haskell-0.1.0.0-inplace:318102
+semigroupoids-5.3.7-270589a8401396f8a94a8243c1b3bd1f70b941d5c8aeaac0b412e774cbd570d2:9035
+splitmix-0.1.0.4-6a8083cdaee6584130cd1ff7f684480444e3d41ea12790049d706a00f48292f7:282
+transformers-0.5.5.0-G04gvztnbOh179zpc38KGD:1926
+vector-0.12.3.1-c264b8664a165bfc4a52e07f07564c657516c26283fa3a31f32f47883c834a5e:8660
 
 
 code size per module:
@@ -36,7 +36,7 @@ base
     Foreign.C.Error:                    1574
     Foreign.Marshal.Alloc:              3219
     Foreign.Storable:                   3353
-    GHC.Arr:                            9313
+    GHC.Arr:                            8945
     GHC.Base:                           582
     GHC.Char:                           4195
     GHC.Conc.Sync:                      271
@@ -89,11 +89,11 @@ containers-0.6.0.1-BAqcfV1UBBeCIRjPbUYeSG
     Data.Map.Internal:                  53904
     Data.Set.Internal:                  1165
 
-extra-1.7.10-d76018cb8518ff171e0305ab0f75838e7c5774558f1e4737d13944e0077e617b
+extra-1.7.12-6cd0d9175117e6448385ce71d3501931d440f3f65e13af68f45544251eb6bb02
     Data.Either.Extra:                  13312
-    Data.List.Extra:                    7507
+    Data.List.Extra:                    7848
 
-free-5.1.7-50f1c5e6b8b606f6bd9fd3c7c90726a034516e3e8639ab50e135aa9288f970a0
+free-5.1.9-273b819981bfcf5abc5e4bcc87d90613372facbd7791be3302320d871e783a83
     Control.Monad.Trans.Free:           701
 
 ghc-prim
@@ -103,7 +103,7 @@ ghc-prim
     GHC.Tuple:                          3485
     GHC.Types:                          19515
 
-ghcjs-base-0.2.0.3-80353eb4ced1c08fe2c7663c4be1856e075f868353321e22a68a8d874a25254c
+ghcjs-base-0.2.1.0-d611a058b84ba6b8020d43c251d1ad9b43ecfb93a9ef5265793fd28a12207bc5
     GHCJS.Foreign.Internal:             13958
     GHCJS.Marshal:                      5105
     GHCJS.Marshal.Internal:             2141
@@ -117,11 +117,11 @@ ghcjs-prim-0.1.1.0-EXzjGVHQlAS2XAXcu0iCbS
 integer-gmp
     GHC.Integer.Type:                   6323
 
-jsaddle-0.9.8.0-e6dd9a48f67bab859fa9e582d5dd79b4eaecd43267c3ad403e90864f48d9e695
+jsaddle-0.9.8.2-c08a5fc0b08386adea12c5e8675bfdb1082b0b44e2bf92e87225651708530d2b
     Language.Javascript.JSaddle.Arguments:521
     Language.Javascript.JSaddle.Object: 4735
 
-lens-5.0.1-580c8f3ef428a94ada2f97c360a212969edb1a483aee41d1c05545dea873cd30
+lens-5.1.1-032503a8a5c7cbecabc6fcd2132aff10b7ad7109c5515424b72de24e01bc59c9
     Control.Lens.Internal.Bazaar:       7043
     Control.Lens.Internal.Magma:        443
     Control.Lens.Lens:                  2276
@@ -131,10 +131,10 @@ lens-5.0.1-580c8f3ef428a94ada2f97c360a212969edb1a483aee41d1c05545dea873cd30
 main
     Main:                               21671
 
-profunctors-5.6.2-8fd9df0a6dd2c4b8058661b5031cf0f514efd4ebba8ad7169899fe90e7e0ef19
+profunctors-5.6.2-a825919439abbe2f6507e5ad13a147230dad3802e581a7af698e3177e2b38303
     Data.Profunctor.Sieve:              8225
 
-satyros-0.3.1.4-81c0247269bdf7108186cfae642aa1ae776600b63b70fee7dcbb8e577afd96e2
+satyros-0.3.1.4-b5902b4cbde38e6ca8244f39ac015484b30bcfa4404bf620ffef55d43d3f2858
     Satyros.BellmanFord.Effect:         38915
     Satyros.BellmanFord.NegativeCycle:  49749
     Satyros.BellmanFord.Propagation:    56138
@@ -153,26 +153,27 @@ satyros-0.3.1.4-81c0247269bdf7108186cfae642aa1ae776600b63b70fee7dcbb8e577afd96e2
     Satyros.QFIDL.Conversion:           15028
     Satyros.QFIDL.Expressed:            4843
     Satyros.QFIDL.Expressible:          1
-    Satyros.QFIDL.Variable:             79380
+    Satyros.QFIDL.Variable:             6735
 
 satyros-ui-haskell-0.1.0.0-inplace
-    Satyros.Handler.Clever:             77125
-    Satyros.Handler.Naive:              229716
+    Satyros.Handler.Clever:             70567
+    Satyros.Handler.Common:             9594
+    Satyros.Handler.Naive:              229720
     Satyros.UI:                         7170
     Satyros.UI.Util:                    1051
 
-semigroupoids-5.3.6-e310043383482ce50129ffb1969464a0a595be1abf415300ca528590db6573b7
+semigroupoids-5.3.7-270589a8401396f8a94a8243c1b3bd1f70b941d5c8aeaac0b412e774cbd570d2
     Data.Functor.Bind.Class:            2794
     Data.Semigroup.Traversable.Class:   6241
 
 splitmix-0.1.0.4-6a8083cdaee6584130cd1ff7f684480444e3d41ea12790049d706a00f48292f7
-    System.Random.SplitMix:             280
+    System.Random.SplitMix:             282
 
-transformers-0.5.6.2-KaPP0fdMTwBF02jPgfEE5s
-    Control.Monad.Trans.State.Lazy:     788
+transformers-0.5.5.0-G04gvztnbOh179zpc38KGD
+    Control.Monad.Trans.State.Lazy:     790
     Control.Monad.Trans.State.Strict:   1136
 
-vector-0.12.3.1-27b167672a6fc314dbc1ab438da26924af6ecb05af35dd9853e6ed8953fd3648
+vector-0.12.3.1-c264b8664a165bfc4a52e07f07564c657516c26283fa3a31f32f47883c834a5e
     Data.Vector:                        1081
     Data.Vector.Fusion.Bundle.Size:     5461
     Data.Vector.Internal.Check:         756
@@ -180,5 +181,5 @@ vector-0.12.3.1-27b167672a6fc314dbc1ab438da26924af6ecb05af35dd9853e6ed8953fd3648
 
 
 
-packed metadata: 338768
+packed metadata: 334487
 

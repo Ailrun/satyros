@@ -44,60 +44,9 @@ function h$ghcjsbn_isPrime_s(s, rounds) {
   }
   throw new Error("isPrime_s");
 }
-function h$ghcjsbn_random_b(min, max) {
-  if(h$ghcjsbn_cmp_bb(min, max) >= 0) {
-    return min;
-  }
-  var range = h$ghcjsbn_sub_bb(max, min);
-  var size = 4 + Math.ceil(h$ghcjsbn_nbits_b(range) / 16);
-  var r = h$ghcjsbn_zero_b;
-  for(var i=0;i<size;i++) {
-    var rnd = Math.floor(Math.random()*65536);
-    r = h$ghcjsbn_or_bb(h$ghcsbn_shl_b(r, 16), h$ghcjsbn_mkBigNat_w(rnd));
-  }
-  return h$ghcjsbn_add_bb(h$ghcjsbn_rem_bb(r, range), min);
-}
-function h$ghcjsbn_testPrime_b(n, rounds) {
-  var r = 0, d = n;
-  var nm1 = h$ghcjsbn_sub_bw(n,1);
-  var two = h$ghcjsbn_mkBigNat_w(2);
-  while(h$ghcjsbn_testBit_b(d, 0)) {
-    d = h$ghcjsbn_shr_b(d, 1);
-    r++;
-  }
-  for(var round = 0; round < rounds; round++) {
-    var a = h$ghcjsbn_random_b(two, nm1);
-    var x = h$ghcjsbn_modPow_bbb(a, d, n);
-    if(h$ghcjsbn_eq_bw(x,1) || h$ghcjsbn_eq_bb(x,nm1)) continue;
-    var found = false;
-    for(var rr=0;rr<r;rr++) {
-      x = h$ghcjsbn_modPow_bbb(x, two, n);
-      if(h$ghcjsbn_eq_bb(x, nm1)) {
-        found = true;
-        break;
-      }
-    }
-    if(!found) return 0;
-  }
-  return 1;
-}
-function h$ghcjsbn_testPrime_w(w, rounds) {
-  return h$ghcjsbn_testPrime_b(h$ghcjsbn_mkBigNat_w(w), rounds);
-}
-function h$integer_gmp_next_prime1(w) {
-  var r = h$ghcjsbn_nextPrime_b(h$ghcjsbn_mkBigNat_w(w));
-  return h$ghcjsbn_toWord_b(r);
-}
-function h$ghcjsbn_nextPrime_b(bn) {
-  var rounds = 64;
-  if(h$ghcjsbn_eq_bw(bn, 2)) {
-    return h$ghcjsbn_mkBigNat_w(3);
-  }
-  var i = bn;
-  do {
-    i = h$ghcjsbn_add_bw(i, 2);
-  } while(!h$ghcjsbn_testPrime_b(i, rounds));
-  return i;
+function h$ghcjsbn_isPrime_b(b, rounds) {
+  ;
+  throw new Error("isPrime_b");
 }
 function h$ghcjsbn_cmp_bb(b1, b2) {
   ;
@@ -533,51 +482,14 @@ function h$ghcjsbn_pow_ww(w1, w2) {
   ;
   return t;
 }
-function h$ghcjsbn_modPow_bbb(b, e, m) {
-  var r = h$ghcjsbn_one_b, b = h$ghcjsbn_rem_bb(b, m);
-  while(!h$ghcjsbn_eq_bw(e, 0)) {
-    if(h$ghcjsbn_testBit_b(e, 0)) {
-      r = h$ghcjsbn_rem_bb(h$ghcjsbn_mul_bb(r, b), m);
-    }
-    e = h$ghcjsbn_shr_b(e, 1);
-    b = h$ghcjsbn_rem_bb(h$ghcjsbn_mul_bb(b, b), m);
-  }
-  return r;
+function h$ghcjsbn_modPow_bbb(b, s1, s2) {
+  throw new Error("modPow_bbb");
 }
-function h$ghcjsbn_modPow_bss(b, e, m) {
-  return h$ghcjsbn_modPow_sss(h$ghcjsbn_rem_bw(b, m), e, m);
+function h$ghcjsbn_modPow_bss(b, s1, s2) {
+  throw new Error("modPow_bss");
 }
-function h$ghcjsbn_modPow_sss(b, e, m) {
-  return h$integer_gmp_powm_word(b, e, m);
-}
-function h$ghcjsbn_modular_inverse(a, n) {
-    var t = h$ghcjsbn_zero_b, newt = h$ghcjsbn_one_b;
-    var r = n, newr = a;
-    while(!h$ghcjsbn_cmp_bw(newr, 0)) {
-      var quotient = h$ghcjsbn_div_bb(r, newr);
-      var tmp = newt;
-      newt = h$ghcjsbn_sub_bb(t, h$ghcjsbn_mul_bb(quotient, newt));
-      t = tmp;
-      tmp = newr;
-      newr = h$ghcjsbn_sub_bb(r, h$ghcjsbn_mul_bb(quotient, newr));
-      r = tmp;
-    }
-    if(h$ghcjsbn_cmp_bw(r, 1) > 0) return a;
-    return t;
-}
-function h$ghcjsbn_powModSBigNat(bpos, base, epos, exp, m) {
-  var newBase = bpos ? base : h$ghcjsbn_sub_bb(m, base);
-  var newExp = epos ? exp : h$ghcjsbn_modular_inverse(exp, m);
-  return h$ghcjsbn_modPow_bbb(newBase, newExp, m);
-}
-function h$integer_gmp_powm_word(b, e, m) {
-  var r = 1, b = b % m;
-  while(e !== 0) {
-    if(e % 2 === 1) r = (r * b) % m;
-    e = e >>> 1;
-    b = (b * b) % m;
-  }
-  return r;
+function h$ghcjsbn_modPow_sss(s1, s2, s3) {
+  throw new Error("modPow_sss");
 }
 function h$ghcjsbn_gcd_bb(b1, b2) {
   ;
@@ -859,8 +771,9 @@ function h$ghcjsbn_testBit_b(b, n) {
   if(limb >= b[0]) {
     return false;
   } else {
+    var d = b[limb];
     var bit = n - (28 * limb);
-    return (b[limb+1] & (1 << bit)) !== 0;
+    return (b[limb] & (1 << bit)) !== 0;
   }
 }
 function h$ghcjsbn_popCount_b(b) {
@@ -1075,6 +988,12 @@ function h$ghcjsbn_mkInteger(nonNeg, xs) {
     }
   }
 }
+function h$ghcjsbn_indexBigNat(b, i) {
+  ;
+  ;
+  var bl = b[0];
+  return i >= bl ? 0 : b[i+1];
+}
 function h$ghcjsbn_cmp_bw(b, w) {
   ;
   ;
@@ -1181,9 +1100,9 @@ function h$ghcjsbn_bitBigNat(n) {
 function h$ghcjsbn_integerLog2(i) {
   ;
   if(((i).f === h$integerzmgmpZCGHCziIntegerziTypeziSzh_con_e)) {
-    return h$ghcjsbn_nbits_s(((i).d1))-1;
+    return h$ghcjsbn_nbits_s(((i).d1));
   } else {
-    return h$ghcjsbn_nbits_b(((i).d1))-1;
+    return h$ghcjsbn_nbits_b(((i).d1));
   }
 }
 function h$ghcjsbn_integerLog2IsPowerOf2(i) {
@@ -1242,43 +1161,24 @@ function h$ghcjsbn_sizeof_b(b) {
   return Math.ceil((bl * 28) / 32);
 }
 function h$ghcjsbn_index_b(b, w) {
-  var limb = (32 * w / 28)|0;
-  var l = b[0];
-  var l1 = limb < l ? b[limb+1] : 0;
-  var l2 = (limb+1) < l ? b[limb+2] : 0;
-  var ws = 4 * (w % 7);
-  return (l1 >>> ws) | (l2 << 28 - ws);
+  throw new Error("index_b");
+  ;
+  ;
+  var wbit = 32*w, len = b[0], limb = (wbit / 28) | 0, lb = wbit - (limb * 28);
+  var r = b[limb+1] >>> lb;
+  ;
 }
 function h$ghcjsbn_toDouble_b(nonNeg, b) {
   throw new Error("toDouble_b");
 }
 function h$ghcjsbn_byteArrayToBigNat(ba, len) {
-  return h$ghcjsbn_importBigNatFromByteArray(ba, 0, len, 0);
+  throw new Error("h$ghcjsbn_byteArrayToBigNat not yet implemented");
 }
 function h$ghcjsbn_importBigNatFromAddr(a_d, a_o, len, msbf) {
-  var r = h$ghcjsbn_zero_b;
-  for(var i=0;i<len;i++) {
-    var off = msbf ? i : (len-i-1);
-    var val = a_d.u8[off];
-    var r = h$ghcjsbn_or_bb(h$ghcjsbn_shl_b(r, 8), h$ghcjsbn_mkBigNat_w(val));
-  }
-  return r;
+  throw new Error("h$ghcjsbn_importBigNatFromAddr not yet implemented");
 }
 function h$ghcjsbn_importBigNatFromByteArray(ba, ofs, len, msbf) {
-  return h$ghcjsbn_importBigNatFromAddr(ba, ofs, len, msbf);
-}
-function h$ghcjsbn_exportToAddr_b(bn, a_d, a_o, msbf) {
-  var bytes = h$ghcjsbn_sizeInBase_b(bn, 256);
-  for(var i=0;i<bytes;i++) {
-    var b = h$ghcjsbn_toWord_b(bn) & 255;
-    var off = msbf ? bytes-i-1 : i;
-    bn = h$ghcjsbn_shr_b(bn, 8);
-    a_d.u8[a_o+off] = b;
-  }
-  return bytes;
-}
-function h$ghcjsbn_exportToAddr_w(w, a_d, a_o, msbf) {
-  return h$ghcjsbn_exportToAddr_b(h$ghcjsbn_mkBigNat_w(w), a_d, a_o, msbf);
+  throw new Error("h$ghcjsbn_importBigNatFromByteArray not yet implemented");
 }
 var h$integer_int64ToInteger = h$ghcjsbn_toInteger_s64;
 function h$ghcjsbn_toInteger_s64(s_a, s_b) {
@@ -1406,21 +1306,6 @@ function h$ghcjsbn_encodeDouble_s(m, e) {
   var r = m * Math.pow(2, e);
   ;
   return r;
-}
-function h$ghcjsbn_sizeInBase_b(bn, base) {
-  if(h$ghcjsbn_eq_bb(bn, h$ghcjsbn_zero_b)) return 1;
-  var bits = h$ghcjsbn_nbits_b(bn);
-  var r;
-  if(h$popCnt32(base) === 1) {
-    var factor = Math.round(Math.log(base)/Math.log(2));
-    r = Math.ceil(bits/factor);
-  } else {
-    r = Math.ceil(bits*Math.log(2)/Math.log(base));
-  }
-  return r;
-}
-function h$integer_gmp_mpn_sizeinbase1(w, base) {
-  return h$ghcjsbn_sizeInBase_b(h$ghcjsbn_mkBigNat_w(w), base);
 }
 function h$fromArray(a) {
     var r = h$ghczmprimZCGHCziTypesziZMZN;
@@ -1848,9 +1733,9 @@ if(String.prototype.startsWith) {
     h$jsstringStripPrefix = function(p, x) {
  ;
  if(x.startsWith(p)) {
-     return (h$c1(h$baseZCGHCziMaybeziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(p.length)))))));
+     return (h$c1(h$baseZCGHCziBaseziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(p.length)))))));
  } else {
-     return h$baseZCGHCziMaybeziNothing;
+     return h$baseZCGHCziBaseziNothing;
  }
     }
     h$jsstringIsPrefixOf = function(p, x) {
@@ -1861,9 +1746,9 @@ if(String.prototype.startsWith) {
     h$jsstringStripPrefix = function(p, x) {
  ;
  if(x.indexOf(p) === 0) {
-     return (h$c1(h$baseZCGHCziMaybeziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(p.length)))))));
+     return (h$c1(h$baseZCGHCziBaseziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(p.length)))))));
  } else {
-   return h$baseZCGHCziMaybeziNothing;
+   return h$baseZCGHCziBaseziNothing;
  }
     }
     h$jsstringIsPrefixOf = function(p, x) {
@@ -1875,9 +1760,9 @@ if(String.prototype.endsWith) {
     h$jsstringStripSuffix = function(s, x) {
  ;
  if(x.endsWith(s)) {
-     return (h$c1(h$baseZCGHCziMaybeziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(0,x.length-s.length)))))));
+     return (h$c1(h$baseZCGHCziBaseziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(0,x.length-s.length)))))));
  } else {
-   return h$baseZCGHCziMaybeziNothing;
+   return h$baseZCGHCziBaseziNothing;
  }
     }
     h$jsstringIsSuffixOf = function(s, x) {
@@ -1890,9 +1775,9 @@ if(String.prototype.endsWith) {
  var i = x.lastIndexOf(s);
  var l = x.length - s.length;
  if(i !== -1 && i === l) {
-     return (h$c1(h$baseZCGHCziMaybeziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(0,l)))))));
+     return (h$c1(h$baseZCGHCziBaseziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(0,l)))))));
  } else {
-   return h$baseZCGHCziMaybeziNothing;
+   return h$baseZCGHCziBaseziNothing;
  }
     }
       h$jsstringIsSuffixOf = function(s, x) {
@@ -1917,7 +1802,7 @@ function h$jsstringCommonPrefixes(x, y) {
     var lx = x.length, ly = y.length, i = 0, cx;
     var l = lx <= ly ? lx : ly;
     if(lx === 0 || ly === 0 || x.charCodeAt(0) !== y.charCodeAt(0)) {
-      return h$baseZCGHCziMaybeziNothing;
+      return h$baseZCGHCziBaseziNothing;
     }
     while(++i<l) {
  cx = x.charCodeAt(i);
@@ -1926,8 +1811,8 @@ function h$jsstringCommonPrefixes(x, y) {
      break;
  }
     }
-  if(i===0) return h$baseZCGHCziMaybeziNothing;
-    return (h$c1(h$baseZCGHCziMaybeziJust_con_e, ((h$c3(h$ghczmprimZCGHCziTupleziZLz2cUz2cUZR_con_e,((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, ((i===lx)?x:((i===ly)?y:x.substr(0,i)))))),((i===lx) ? h$jsstringEmpty : (h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(i))))),((i===ly) ? h$jsstringEmpty : (h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (y.substr(i))))))))));
+  if(i===0) return h$baseZCGHCziBaseziNothing;
+    return (h$c1(h$baseZCGHCziBaseziJust_con_e, ((h$c3(h$ghczmprimZCGHCziTupleziZLz2cUz2cUZR_con_e,((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, ((i===lx)?x:((i===ly)?y:x.substr(0,i)))))),((i===lx) ? h$jsstringEmpty : (h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(i))))),((i===ly) ? h$jsstringEmpty : (h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (y.substr(i))))))))));
 }
 function h$jsstringBreakOn(b, x) {
     ;
@@ -3110,9 +2995,9 @@ if(String.prototype.startsWith) {
     h$jsstringStripPrefix = function(p, x) {
  ;
  if(x.startsWith(p)) {
-     return (h$c1(h$baseZCGHCziMaybeziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(p.length)))))));
+     return (h$c1(h$baseZCGHCziBaseziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(p.length)))))));
  } else {
-     return h$baseZCGHCziMaybeziNothing;
+     return h$baseZCGHCziBaseziNothing;
  }
     }
     h$jsstringIsPrefixOf = function(p, x) {
@@ -3123,9 +3008,9 @@ if(String.prototype.startsWith) {
     h$jsstringStripPrefix = function(p, x) {
  ;
  if(x.indexOf(p) === 0) {
-     return (h$c1(h$baseZCGHCziMaybeziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(p.length)))))));
+     return (h$c1(h$baseZCGHCziBaseziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(p.length)))))));
  } else {
-   return h$baseZCGHCziMaybeziNothing;
+   return h$baseZCGHCziBaseziNothing;
  }
     }
     h$jsstringIsPrefixOf = function(p, x) {
@@ -3137,9 +3022,9 @@ if(String.prototype.endsWith) {
     h$jsstringStripSuffix = function(s, x) {
  ;
  if(x.endsWith(s)) {
-     return (h$c1(h$baseZCGHCziMaybeziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(0,x.length-s.length)))))));
+     return (h$c1(h$baseZCGHCziBaseziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(0,x.length-s.length)))))));
  } else {
-   return h$baseZCGHCziMaybeziNothing;
+   return h$baseZCGHCziBaseziNothing;
  }
     }
     h$jsstringIsSuffixOf = function(s, x) {
@@ -3152,9 +3037,9 @@ if(String.prototype.endsWith) {
  var i = x.lastIndexOf(s);
  var l = x.length - s.length;
  if(i !== -1 && i === l) {
-     return (h$c1(h$baseZCGHCziMaybeziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(0,l)))))));
+     return (h$c1(h$baseZCGHCziBaseziJust_con_e, ((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(0,l)))))));
  } else {
-   return h$baseZCGHCziMaybeziNothing;
+   return h$baseZCGHCziBaseziNothing;
  }
     }
       h$jsstringIsSuffixOf = function(s, x) {
@@ -3179,7 +3064,7 @@ function h$jsstringCommonPrefixes(x, y) {
     var lx = x.length, ly = y.length, i = 0, cx;
     var l = lx <= ly ? lx : ly;
     if(lx === 0 || ly === 0 || x.charCodeAt(0) !== y.charCodeAt(0)) {
-      return h$baseZCGHCziMaybeziNothing;
+      return h$baseZCGHCziBaseziNothing;
     }
     while(++i<l) {
  cx = x.charCodeAt(i);
@@ -3188,8 +3073,8 @@ function h$jsstringCommonPrefixes(x, y) {
      break;
  }
     }
-  if(i===0) return h$baseZCGHCziMaybeziNothing;
-    return (h$c1(h$baseZCGHCziMaybeziJust_con_e, ((h$c3(h$ghczmprimZCGHCziTupleziZLz2cUz2cUZR_con_e,((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, ((i===lx)?x:((i===ly)?y:x.substr(0,i)))))),((i===lx) ? h$jsstringEmpty : (h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(i))))),((i===ly) ? h$jsstringEmpty : (h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (y.substr(i))))))))));
+  if(i===0) return h$baseZCGHCziBaseziNothing;
+    return (h$c1(h$baseZCGHCziBaseziJust_con_e, ((h$c3(h$ghczmprimZCGHCziTupleziZLz2cUz2cUZR_con_e,((h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, ((i===lx)?x:((i===ly)?y:x.substr(0,i)))))),((i===lx) ? h$jsstringEmpty : (h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (x.substr(i))))),((i===ly) ? h$jsstringEmpty : (h$c1(h$ghcjszmprimZCGHCJSziPrimziJSVal_con_e, (y.substr(i))))))))));
 }
 function h$jsstringBreakOn(b, x) {
     ;
